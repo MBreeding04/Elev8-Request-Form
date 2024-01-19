@@ -1,0 +1,80 @@
+.Form {
+    border-radius: 10px;
+    border: 1px solid #BBB;
+    background: #FFF;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    padding: 24px;
+}
+
+.Headers {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: #F60;
+    font-size: 32px;
+
+}
+
+.SubHeaders {
+    display: flex;
+    justify-content: center;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #F60;
+    font-size: 48px;
+    letter-spacing: 4.8px;
+}
+
+.Questions {
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 12px;
+    color: #000;
+    font-family: Poppins;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: 3.2px;
+}
+
+.questionContainer {
+    display: flex;
+    flex-direction: row;
+    padding: 8px;
+    width: 100%;
+}
+
+.questionInput {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+}
+.DocumentInput{
+    display: flex;
+    flex-direction: column;
+    width: 93%
+}
+
+.SubmitDocuments {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-content: center;
+    flex-shrink: 0;
+    border-radius: 5px;
+    border: 0.5px dashed #F60;
+    background: #FFF;
+}
+
+.gray {
+    padding-top: 24px;
+    padding-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    color: rgba(103, 103, 103, 0.50);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}

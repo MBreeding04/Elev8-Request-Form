@@ -1,0 +1,20 @@
+.DropDownPopUp {
+    display: flex;
+    flex-direction: column;
+    color: #000;
+    font-family: Poppins;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: 3.2px;
+    align-content: center;
+}
+.text{
+    font-family: Poppins;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: 3.2px;
+}

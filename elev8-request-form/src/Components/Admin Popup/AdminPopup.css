@@ -1,0 +1,48 @@
+.AdminPopup {
+    width: 809px;
+    height: 368px;
+    border-radius: 5px;
+    border: 0.5px solid #787878;
+    background: #F9F9F9;
+    display: flex;
+    flex-direction: column;
+}
+
+.AdminLoginHeader {
+    display: flex;
+    justify-content: space-between;
+    color: #010101;
+    padding: 8px;
+    font-family: Poppins;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: 3.2px;
+}
+
+.AdminInputs {
+    display: flex;
+    flex-direction: column;
+    padding-top: 16px;
+    padding-right: 48px;
+    padding-left: 48px;
+    color: #F60;
+    font-family: Poppins;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: 1.2px;
+}
+
+.Submit {
+    color: #FFF;
+
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    letter-spacing: 2.4px;
+}
