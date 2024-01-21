@@ -67,8 +67,8 @@
 }
 
 .gray {
-    padding-top: 24px;
-    padding-bottom: 24px;
+    padding-top: 64px;
+    padding-bottom: 64px;
     display: flex;
     flex-direction: column;
     color: rgba(103, 103, 103, 0.50);

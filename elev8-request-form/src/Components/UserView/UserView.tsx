@@ -43,7 +43,7 @@ function UserView() {
         } else {
             setCurrentColors(DarkPallete);
         }
-    })
+    },[])
     return (
         <Box className="MainBody" sx={{ bgcolor: CurrentColors.Main }}>
             <Box className="Header" sx={{ bgcolor: CurrentColors.Header }}>
