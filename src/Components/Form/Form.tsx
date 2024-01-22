@@ -1,4 +1,4 @@
-import { Box, Divider, TextField } from "@mui/material";
+import { Box, Divider, TextField, Button } from "@mui/material";
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -113,8 +113,15 @@ function Form() {
                         </Box>
                     </Box>
                 </Box>
-                
             </Box>
+            <Button onClick={()=>{
+                    
+                }} sx={{
+                    width:'100%',
+                    bgcolor: '#F60', ':hover': {
+                        bgcolor: '#CD5200',
+                    }
+                }} variant="contained"><Box className='Submit'>Submit</Box></Button>
         </Box>
     );
 }
