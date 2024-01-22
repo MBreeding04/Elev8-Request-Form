@@ -4,17 +4,50 @@ import Carousel from "react-material-ui-carousel";
 import AdminDropdown from "../AdminDropdown/AdminDropdown";
 import MenuIcon from '@mui/icons-material/Menu';
 import Logo from '../../assets/elv8 logo white 1.png'
-import AdminPopup from "../Admin Popup/AdminPopup";
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 import '../AdminPage/AdminPageView.css'
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import PieChart from '../Piechart/Piechart'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArticleIcon from '@mui/icons-material/Article';
-import TableRowsIcon from '@mui/icons-material/TableRows';
 interface DummyData {
     percent: string
     header: string
 }
+function createData(
+    name: string,
+    calories: number,
+    fat: number,
+    carbs: number,
+    protein: number,
+) {
+    return { name, calories, fat, carbs, protein };
+}
+
+const rows = [
+    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
+    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
+    createData('Eclair', 262, 16.0, 24, 6.0),
+    createData('Cupcake', 305, 3.7, 67, 4.3),
+    createData('Gingerbread', 356, 16.0, 49, 3.9),
+    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
+    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
+    createData('Eclair', 262, 16.0, 24, 6.0),
+    createData('Cupcake', 305, 3.7, 67, 4.3),
+    createData('Gingerbread', 356, 16.0, 49, 3.9),
+    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
+    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
+    createData('Eclair', 262, 16.0, 24, 6.0),
+    createData('Cupcake', 305, 3.7, 67, 4.3),
+    createData('Gingerbread', 356, 16.0, 49, 3.9),
+  
+];
 function AdminPageView() {
     const dummy: DummyData[] = [
         {
@@ -78,7 +111,7 @@ function AdminPageView() {
         }
     }, [])
     return (
-        <Box className="MainBody" sx={{ bgcolor: CurrentColors.Main }}>
+        <Box className="AdminMainBody" sx={{ bgcolor: CurrentColors.Main }}>
             <Box className="Header" sx={{ bgcolor: CurrentColors.Header }}>
                 <Box className='imageContainer'>
                     <img src={Logo} alt="Elev8"></img>
@@ -91,9 +124,6 @@ function AdminPageView() {
                     <AdminDropdown setToggledMenu={setToggledMenu} ToggledMenu={ToggledMenu} ></AdminDropdown>
                 </Menu>
             </Box>
-            <Modal className="Modal" open={ToggledPopup} onClose={() => { setToggledPopup(false) }}>
-                <AdminPopup setToggledPopup={setToggledPopup} ToggledPopup={ToggledPopup}></AdminPopup>
-            </Modal>
             <Box className="AdminContainer">
                 <Box className='leftSide'>
                     <Carousel className="Carousel">
@@ -108,26 +138,47 @@ function AdminPageView() {
                         <CheckBoxIcon sx={{ color: '#F60', fontSize: '50px' }}></CheckBoxIcon><Box className="PercentHeaders">Active</Box>
                     </Box>
                     <Box className='BottomRightSide'>
-                    <Button onClick={() => {
-                        }} sx={{
-                            m:'24px',
-                            py:'12px',
-                            bgcolor: '#F60', ':hover': {
-                                bgcolor: '#CD5200',
-                            }
-                        }} variant="contained"><TableRowsIcon></TableRowsIcon><Box className='Submit'>Read All Responses</Box></Button>
+                        <TableContainer component={Paper}>
+                            <Table sx={{ minWidth: 650}} aria-label="simple table">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell className="AdminTableHeaders">Dessert (100g serving)</TableCell>
+                                        <TableCell className="AdminTableHeaders" align="right">Calories</TableCell>
+                                        <TableCell className="AdminTableHeaders" align="right">Fat&nbsp;(g)</TableCell>
+                                        <TableCell className="AdminTableHeaders" align="right">Carbs&nbsp;(g)</TableCell>
+                                        <TableCell className="AdminTableHeaders" align="right">Protein&nbsp;(g)</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {rows.map((row) => (
+                                        <TableRow
+                                            key={row.name}
+                                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                        >
+                                            <TableCell className="AdminTableData" component="th" scope="row">
+                                                {row.name}
+                                            </TableCell>
+                                            <TableCell className="AdminTableData" align="right">{row.calories}</TableCell>
+                                            <TableCell className="AdminTableData" align="right">{row.fat}</TableCell>
+                                            <TableCell className="AdminTableData" align="right">{row.carbs}</TableCell>
+                                            <TableCell className="AdminTableData" align="right">{row.protein}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
                         <Button onClick={() => {
                         }} sx={{
-                            m:'24px',
-                            py:'12px',
+                            m: '24px',
+                            py: '12px',
                             bgcolor: '#107C41', ':hover': {
                                 bgcolor: '#0a5c2f',
                             }
                         }} variant="contained"><ArticleIcon></ArticleIcon><Box className='Submit'>Export to Excel</Box></Button>
                         <Button onClick={() => {
                         }} sx={{
-                            m:'24px',
-                            py:'12px',
+                            m: '24px',
+                            py: '12px',
                             bgcolor: '#eb311c', ':hover': {
                                 bgcolor: '#d42a17',
                             }

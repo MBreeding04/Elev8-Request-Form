@@ -19,7 +19,7 @@ const PieChart: React.FC<PieChartProps> = ({ data, labels }) => {
                         labels: labels,
                         datasets: [{
                             data: data,
-                            backgroundColor: ['red', 'orange', 'blue', 'yellow','black'],
+                            backgroundColor: ['#FFA500', '#FF8C00', '#FF7F50', '#FF6347','#FF4500'],
                         }],
                     },
                     options: {
