@@ -1,3 +1,25 @@
+.AdminTableHeaders{
+    color: #F60;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    letter-spacing: 4px;
+}
+.AdminTableData{
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 12px;
+    color: #000;
+    font-family: Poppins;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: 3.2px;
+}
+
 .Carousel {
     width: 50%;
     padding: 24px;
@@ -111,25 +133,4 @@
     justify-content: center;
     width: 100%;
     height: 100%;
-}
-.AdminTableHeaders{
-    color: #F60;
-    font-family: Poppins;
-    font-size: 24px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
-    letter-spacing: 4px;
-}
-.AdminTableData{
-    padding-left: 24px;
-    padding-right: 24px;
-    padding-bottom: 12px;
-    color: #000;
-    font-family: Poppins;
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 300;
-    line-height: normal;
-    letter-spacing: 3.2px;
 }

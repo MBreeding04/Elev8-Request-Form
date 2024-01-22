@@ -142,11 +142,11 @@ function AdminPageView() {
                             <Table sx={{ minWidth: 650}} aria-label="simple table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell className="AdminTableHeaders">Dessert (100g serving)</TableCell>
-                                        <TableCell className="AdminTableHeaders" align="right">Calories</TableCell>
-                                        <TableCell className="AdminTableHeaders" align="right">Fat&nbsp;(g)</TableCell>
-                                        <TableCell className="AdminTableHeaders" align="right">Carbs&nbsp;(g)</TableCell>
-                                        <TableCell className="AdminTableHeaders" align="right">Protein&nbsp;(g)</TableCell>
+                                        <TableCell><Box className="AdminTableHeaders">Dessert (100g serving)</Box></TableCell>
+                                        <TableCell align="right"><Box className="AdminTableHeaders">Calories</Box></TableCell>
+                                        <TableCell align="right"><Box className="AdminTableHeaders">Fat&nbsp;(g)</Box></TableCell>
+                                        <TableCell align="right"><Box className="AdminTableHeaders">Carbs&nbsp;(g)</Box></TableCell>
+                                        <TableCell align="right"><Box className="AdminTableHeaders">Protein&nbsp;(g)</Box></TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -155,13 +155,13 @@ function AdminPageView() {
                                             key={row.name}
                                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                         >
-                                            <TableCell className="AdminTableData" component="th" scope="row">
-                                                {row.name}
+                                            <TableCell component="th" scope="row">
+                                            <Box className="AdminTableData" >{row.name}</Box>
                                             </TableCell>
-                                            <TableCell className="AdminTableData" align="right">{row.calories}</TableCell>
-                                            <TableCell className="AdminTableData" align="right">{row.fat}</TableCell>
-                                            <TableCell className="AdminTableData" align="right">{row.carbs}</TableCell>
-                                            <TableCell className="AdminTableData" align="right">{row.protein}</TableCell>
+                                            <TableCell align="right"><Box className="AdminTableData" >{row.calories}</Box></TableCell>
+                                            <TableCell align="right"><Box className="AdminTableData" >{row.fat}</Box></TableCell>
+                                            <TableCell align="right"><Box className="AdminTableData" >{row.carbs}</Box></TableCell>
+                                            <TableCell align="right"><Box className="AdminTableData" >{row.protein}</Box></TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
