@@ -4,8 +4,13 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
+import Axios from "axios";
 import { useState, useEffect } from "react";
 import './Form.css'
+import { v4 as uuidv4 } from 'uuid';
+function generateUUID(): string {
+    return uuidv4();
+}
 function Form() {
     const [TypeError, setTypeError] = useState<string>('');
     const [PageEntry, setPageEntry] = useState<string>('');
@@ -13,6 +18,8 @@ function Form() {
     const [WhatHappenedEntry, setWhatHappenedEntry] = useState<string>('');
     const [WhatDidHappenedEntry, setWhatDidHappenedEntry] = useState<string>('');
     const [dragging, setDragging] = useState(false);
+    const [Images, setImages] = useState<FileList>();
+    const [CurrentUserId, setCurrentUserId] = useState<number>()
 
     useEffect(() => {
         const handleDragEnter = (e: DragEvent) => {
@@ -38,35 +45,7 @@ function Form() {
         const handleFiles = async (files: FileList) => {
             // Handle the dropped files (e.g., upload to a server, process, etc.)
             console.log('Dropped files:', files);
-            for (const file of Array.from(files)) {
-                if (file.type.startsWith('image/')) {
-                    const imageUrl = await uploadToImgur(file);
-                    console.log('Imgur link:', imageUrl);
-                }
-            }
-        };
-
-        const uploadToImgur = async (file: File): Promise<string> => {
-            const clientId = '8f3873ef07648ed'; // Replace with your Imgur client ID
-            const apiUrl = 'https://api.imgur.com/3/image';
-
-            const formData = new FormData();
-            formData.append('image', file);
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Client-ID ${clientId}`,
-                },
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to upload image to Imgur. Status: ${response.status}`);
-            }
-
-            const responseData = await response.json();
-            return responseData.data.link;
+            setImages(files)
         };
 
         // Add event listeners
@@ -89,6 +68,74 @@ function Form() {
         };
 
     }, []);
+    const readBlobAsBinary = (blob: Blob): Promise<ArrayBuffer> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                if (reader.result instanceof ArrayBuffer) {
+                    resolve(reader.result);
+                } else {
+                    reject(new Error('Failed to read blob as binary data.'));
+                }
+            };
+            reader.onerror = () => {
+                reject(new Error('Error reading blob as binary data.'));
+            };
+            reader.readAsArrayBuffer(blob);
+        });
+    };
+    const HandleFormEntrySubmit = async () => {
+        const myUUID: string = generateUUID();
+        await Axios.post("http://localhost:5000/InputFormEntry", {
+            TypeOfError: TypeError,
+            PageOfError: PageEntry,
+            URLOfError: URLEntry,
+            WhatIsExpected: WhatHappenedEntry,
+            WhatDidHappen: WhatDidHappenedEntry,
+            NumOfPictures: 5,
+            UUID: myUUID,
+
+        }).then(async (response) => {
+            if (response.data.inserted === true) {
+                console.log('passed')
+                setCurrentUserId(response.data.result.insertId)
+            }
+            else {
+                console.log('not passed')
+            }
+        }).catch(() => {
+            console.log('not passed')
+        });
+        if (Images === undefined) {
+            console.log('no images need to be processed')
+        }
+        else {
+            handleImageEntries()
+        }
+    }
+    const handleImageEntries = async () => {
+        const submitImageData = async (Blob: ArrayBuffer) => {
+            await Axios.post("http://localhost:5000/InputImages", {
+                Blob: Blob,
+                UUID: CurrentUserId
+            }).then(async (response) => {
+                if (response.data.inserted === true) {
+                    console.log('passed')
+                }
+                else {
+                    console.log('not passed')
+                    console.log(response.data)
+                }
+            }).catch(() => {
+                console.log('not passed')
+            });
+        }
+        for (let i = 0; i < Images!.length; i++) {
+            const blob = new Blob([Images![i]], { type: Images![i].type });
+            const binarydata = await readBlobAsBinary(blob)
+            submitImageData(binarydata)
+        }
+    }
 
     return (
         <Box className='Form'>
@@ -212,6 +259,7 @@ function Form() {
                 </Box>
             </Box>
             <Button onClick={() => {
+                HandleFormEntrySubmit()
             }} sx={{
                 width: '100%',
                 bgcolor: '#F60', ':hover': {

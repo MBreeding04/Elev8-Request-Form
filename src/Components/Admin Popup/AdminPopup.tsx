@@ -3,7 +3,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Box, Divider, IconButton, TextField, Button } from '@mui/material';
 import {
     useNavigate
-  } from "react-router-dom";
+} from "react-router-dom";
 import {useState } from "react";
 import Axios from "axios";
 import Alert from '@mui/material/Alert';
@@ -18,6 +18,7 @@ function AdminPopup({ setToggledPopup, ToggledPopup }: PopupProps) {
     const [UserName, setUserName] = useState<string>('');
     const [Password, setPassword] = useState<string>('');
     const [IsAlert, setIsAlert] = useState<boolean>(false);
+    const [ErrorMessage, setErrorMessage] = useState<string>('');
 
     const HandleUserName = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>{
         setUserName(e.target.value)
@@ -35,8 +36,12 @@ function AdminPopup({ setToggledPopup, ToggledPopup }: PopupProps) {
                 Navigate('/AdminPage')
             }
             else{
+                setErrorMessage('UserName and/or Password is incorrect')
                 setIsAlert(true)
             }
+        }).catch(()=>{
+            setErrorMessage('There was a problem connecting to the server')
+            setIsAlert(true)
         });
     }
     return (
@@ -45,7 +50,7 @@ function AdminPopup({ setToggledPopup, ToggledPopup }: PopupProps) {
                 Admin login
                 <IconButton onClick={() => { setToggledPopup(false) }}><CloseIcon></CloseIcon></IconButton>
             </Box>
-            <Collapse in={IsAlert} unmountOnExit><Alert severity='error'><Box className='errorData'>UserName and/or Password is incorrect<IconButton onClick={()=>{
+            <Collapse in={IsAlert} unmountOnExit><Alert severity='error'><Box className='errorData'>{ErrorMessage}<IconButton onClick={()=>{
                 setIsAlert(false)
             }}><CloseIcon></CloseIcon></IconButton></Box></Alert></Collapse>
             <Divider></Divider>
