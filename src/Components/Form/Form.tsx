@@ -68,23 +68,6 @@ function Form() {
         };
 
     }, []);
-
-    const readBlobAsBinary = (blob: Blob): Promise<ArrayBuffer> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                if (reader.result instanceof ArrayBuffer) {
-                    resolve(reader.result);
-                } else {
-                    reject(new Error('Failed to read blob as binary data.'));
-                }
-            };
-            reader.onerror = () => {
-                reject(new Error('Error reading blob as binary data.'));
-            };
-            reader.readAsArrayBuffer(blob);
-        });
-    };
     const HandleFormEntrySubmit = async () => {
         await Axios.post("http://localhost:5000/InputFormEntry", {
             TypeOfError: TypeError,
@@ -115,31 +98,67 @@ function Form() {
     }
     const handleImageEntries = async () => {
         for (let i = 0; i < Images!.length; i++) {
-            const blob = new Blob([Images![i]], { type: Images![i].type });
-            const binarydata = await readBlobAsBinary(blob)
-            console.log(binarydata)
-            await Axios.post("http://localhost:5000/InputImages",
-                {
-
-                    Blob: binarydata,
-                    UUID: CurrentUserId,
+            const submitImageData = async (binaryData: string | ArrayBuffer | null) => {
+                console.log('binary data inside submitImagedata:')
+                console.log(binaryData)
+                await Axios.post("http://localhost:5000/InputImages",
+                    {
+                        binaryData
+                    }, {
                     headers: {
                         'Content-Type': 'application/octet-stream'
                     }
-                },
+                }
 
-            ).then(async (response) => {
-                console.log(response)
-                if (response.data.inserted === true) {
-                    console.log('passed')
-                }
-                else {
+                ).then(async (response) => {
+                    console.log(response)
+                    if (response.data.inserted === true) {
+                        console.log('passed')
+                    }
+                    else {
+                        console.log('not passed')
+                        console.log(response.data)
+                    }
+                }).catch(() => {
                     console.log('not passed')
-                    console.log(response.data)
+                });
+            }
+
+
+
+
+            //WIP
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // The binary data of the uploaded file is available in e.target.result
+                const binaryData = e.target!.result;
+                console.log(binaryData);
+                //submitImageData(binaryData)
+                // You can use binaryData as needed, for example, display it as an image
+                if (binaryData !== null) {
+                    // Convert binaryData to a data URL
+                    const dataURL: string = (typeof binaryData === 'string')
+                        ? `data:image/jpeg;base64,${binaryData}`
+                        : `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(binaryData)))}`;
+                    // Create an img element and set its src attribute
+                    const imgElement: HTMLImageElement = document.createElement('img');
+                    imgElement.src = dataURL;
+
+                    // Append the img element to the imageContainer div
+                    const imageContainer: HTMLDivElement | null = document.getElementById('imageContainer') as HTMLDivElement | null;
+                    if (imageContainer) {
+                        imageContainer.appendChild(imgElement);
+                    }
                 }
-            }).catch(() => {
-                console.log('not passed')
-            });
+            };
+            // Read the file as a binary data
+            reader.readAsBinaryString(Images![i]);
+            //WIP
+
+
+
+
+
         }
     }
     return (
@@ -256,6 +275,7 @@ function Form() {
                         Please submit pictures of the error/feature:
                     </Box>
                     <Box className='SubmitDocuments' id='dropZone'>
+
                         <Box className='gray'>
                             Drag and Drop files here or browse to upload.
                             <FileUploadIcon sx={{ alignSelf: 'center' }}></FileUploadIcon>
@@ -271,6 +291,7 @@ function Form() {
                     bgcolor: '#CD5200',
                 }
             }} variant="contained"><Box className='Submit'>Submit</Box></Button>
+            <div id="imageContainer"></div>
         </Box>
     );
 }

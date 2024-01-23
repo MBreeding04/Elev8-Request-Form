@@ -2,14 +2,14 @@ import express from "express"
 import mysql from "mysql"
 import cors from "cors"
 import * as dotenv from 'dotenv'
+import * as bodyParser from 'body-parser'
 dotenv.config()
 console.log(dotenv.config())
 const app = express();
 
 app.use(cors())
 
-
-app.use(express.json());
+app.use(express.raw({ type: 'application/octet-stream' }));
 
 const db = mysql.createConnection({
     host: 'sql9.freemysqlhosting.net',
@@ -86,11 +86,10 @@ app.post("/InputFormEntry", async (req, res) => {
 app.post("/InputImages", async (req, res) => {
     console.log(req.body)
     try {
-        const Blob = req.body.Blob;
-        const UUID = req.body.UUID;
+        const Blob = req.body;
         db.query(
-            "INSERT INTO `Pictures` (`PictureBlob`, `UUID`) VALUES (?, ?)",
-            [Blob, UUID],
+            "INSERT INTO `Pictures` (`PictureBlob`, `UUID`) VALUES (?, 9)",
+            [Blob],
             (err, result) => {
                 console.log(`error message: ${err}`)
                 if (err) {
@@ -100,7 +99,7 @@ app.post("/InputImages", async (req, res) => {
                     res.send({inserted: true, result})
                 }
                 else {
-                    res.send({inserted: false, result})
+                    res.send({inserted: true, result})
                 }
             }
         );
