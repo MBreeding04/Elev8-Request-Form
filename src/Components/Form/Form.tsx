@@ -4,9 +4,92 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
-
+import { useState, useEffect } from "react";
 import './Form.css'
 function Form() {
+    const [TypeError, setTypeError] = useState<string>('');
+    const [PageEntry, setPageEntry] = useState<string>('');
+    const [URLEntry, SetURLEntry] = useState<string>('');
+    const [WhatHappenedEntry, setWhatHappenedEntry] = useState<string>('');
+    const [WhatDidHappenedEntry, setWhatDidHappenedEntry] = useState<string>('');
+    const [dragging, setDragging] = useState(false);
+
+    useEffect(() => {
+        const handleDragEnter = (e: DragEvent) => {
+            e.preventDefault();
+            setDragging(true);
+        };
+
+        const handleDragOver = (e: DragEvent) => {
+            e.preventDefault();
+            setDragging(true);
+        };
+
+        const handleDragLeave = () => {
+            setDragging(false);
+        };
+
+        const handleDrop = (e: DragEvent) => {
+            e.preventDefault();
+            setDragging(false);
+            const files = e.dataTransfer!.files;
+            handleFiles(files);
+        };
+        const handleFiles = async (files: FileList) => {
+            // Handle the dropped files (e.g., upload to a server, process, etc.)
+            console.log('Dropped files:', files);
+            for (const file of Array.from(files)) {
+                if (file.type.startsWith('image/')) {
+                    const imageUrl = await uploadToImgur(file);
+                    console.log('Imgur link:', imageUrl);
+                }
+            }
+        };
+
+        const uploadToImgur = async (file: File): Promise<string> => {
+            const clientId = '8f3873ef07648ed'; // Replace with your Imgur client ID
+            const apiUrl = 'https://api.imgur.com/3/image';
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Client-ID ${clientId}`,
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to upload image to Imgur. Status: ${response.status}`);
+            }
+
+            const responseData = await response.json();
+            return responseData.data.link;
+        };
+
+        // Add event listeners
+        const dropZone = document.getElementById('dropZone');
+        if (dropZone) {
+            dropZone.addEventListener('dragenter', handleDragEnter);
+            dropZone.addEventListener('dragover', handleDragOver);
+            dropZone.addEventListener('dragleave', handleDragLeave);
+            dropZone.addEventListener('drop', handleDrop);
+        }
+
+        // Clean up event listeners on component unmount
+        return () => {
+            if (dropZone) {
+                dropZone.removeEventListener('dragenter', handleDragEnter);
+                dropZone.removeEventListener('dragover', handleDragOver);
+                dropZone.removeEventListener('dragleave', handleDragLeave);
+                dropZone.removeEventListener('drop', handleDrop);
+            }
+        };
+
+    }, []);
+
     return (
         <Box className='Form'>
             <Box className='SubHeaders'>
@@ -24,7 +107,11 @@ function Form() {
                             aria-labelledby="demo-radio-buttons-group-label"
                             defaultValue="female"
                             name="radio-buttons-group"
+                            onChange={(e) => {
+                                setTypeError(e.target.value)
+                            }}
                         >
+
                             <FormControlLabel className="Questions" value="Error" control={<Radio sx={{
                                 '&, &.Mui-checked': {
                                     color: '#F60',
@@ -60,7 +147,9 @@ function Form() {
                     <Box className='Questions'>
                         What page is the error/feature being performed on?
                     </Box>
-                    <TextField variant="outlined" />
+                    <TextField variant="outlined" onChange={(e) => {
+                        setPageEntry(e.target.value)
+                    }} />
                 </Box>
             </Box>
             <Box className='questionContainer'>
@@ -69,7 +158,9 @@ function Form() {
                     <Box className='Questions'>
                         What is the URL of the page?
                     </Box>
-                    <TextField variant="outlined" />
+                    <TextField variant="outlined" onChange={(e) => {
+                        SetURLEntry(e.target.value)
+                    }} />
                 </Box>
             </Box>
             <Box className='questionContainer'>
@@ -83,6 +174,9 @@ function Form() {
                         multiline
                         rows={6}
                         variant="outlined"
+                        onChange={(e) => {
+                            setWhatHappenedEntry(e.target.value)
+                        }}
                     />
                 </Box>
             </Box>
@@ -97,6 +191,9 @@ function Form() {
                         multiline
                         rows={6}
                         variant="outlined"
+                        onChange={(e) => {
+                            setWhatDidHappenedEntry(e.target.value)
+                        }}
                     />
                 </Box>
             </Box>
@@ -106,22 +203,21 @@ function Form() {
                     <Box className='Questions'>
                         Please submit pictures of the error/feature:
                     </Box>
-                    <Box className='SubmitDocuments'>
+                    <Box className='SubmitDocuments' id='dropZone'>
                         <Box className='gray'>
                             Drag and Drop files here or browse to upload.
-                            <FileUploadIcon sx={{alignSelf:'center'}}></FileUploadIcon>
+                            <FileUploadIcon sx={{ alignSelf: 'center' }}></FileUploadIcon>
                         </Box>
                     </Box>
                 </Box>
             </Box>
-            <Button onClick={()=>{
-                    
-                }} sx={{
-                    width:'100%',
-                    bgcolor: '#F60', ':hover': {
-                        bgcolor: '#CD5200',
-                    }
-                }} variant="contained"><Box className='Submit'>Submit</Box></Button>
+            <Button onClick={() => {
+            }} sx={{
+                width: '100%',
+                bgcolor: '#F60', ':hover': {
+                    bgcolor: '#CD5200',
+                }
+            }} variant="contained"><Box className='Submit'>Submit</Box></Button>
         </Box>
     );
 }
