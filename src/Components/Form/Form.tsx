@@ -68,6 +68,7 @@ function Form() {
         };
 
     }, []);
+
     const readBlobAsBinary = (blob: Blob): Promise<ArrayBuffer> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -85,23 +86,22 @@ function Form() {
         });
     };
     const HandleFormEntrySubmit = async () => {
-        const myUUID: string = generateUUID();
         await Axios.post("http://localhost:5000/InputFormEntry", {
             TypeOfError: TypeError,
             PageOfError: PageEntry,
             URLOfError: URLEntry,
             WhatIsExpected: WhatHappenedEntry,
             WhatDidHappen: WhatDidHappenedEntry,
-            NumOfPictures: 5,
-            UUID: myUUID,
-
+            NumOfPictures: 5
         }).then(async (response) => {
             if (response.data.inserted === true) {
                 console.log('passed')
                 setCurrentUserId(response.data.result.insertId)
+                console.log('I inserted the data')
             }
             else {
                 console.log('not passed')
+                console.log(response)
             }
         }).catch(() => {
             console.log('not passed')
@@ -114,11 +114,22 @@ function Form() {
         }
     }
     const handleImageEntries = async () => {
-        const submitImageData = async (Blob: ArrayBuffer) => {
-            await Axios.post("http://localhost:5000/InputImages", {
-                Blob: Blob,
-                UUID: CurrentUserId
-            }).then(async (response) => {
+        for (let i = 0; i < Images!.length; i++) {
+            const blob = new Blob([Images![i]], { type: Images![i].type });
+            const binarydata = await readBlobAsBinary(blob)
+            console.log(binarydata)
+            await Axios.post("http://localhost:5000/InputImages",
+                {
+
+                    Blob: binarydata,
+                    UUID: CurrentUserId,
+                    headers: {
+                        'Content-Type': 'application/octet-stream'
+                    }
+                },
+
+            ).then(async (response) => {
+                console.log(response)
                 if (response.data.inserted === true) {
                     console.log('passed')
                 }
@@ -130,13 +141,7 @@ function Form() {
                 console.log('not passed')
             });
         }
-        for (let i = 0; i < Images!.length; i++) {
-            const blob = new Blob([Images![i]], { type: Images![i].type });
-            const binarydata = await readBlobAsBinary(blob)
-            submitImageData(binarydata)
-        }
     }
-
     return (
         <Box className='Form'>
             <Box className='SubHeaders'>

@@ -62,10 +62,9 @@ app.post("/InputFormEntry", async (req, res) => {
         const WhatIsExpected = req.body.WhatIsExpected;
         const WhatDidHappen = req.body.WhatDidHappen;
         const NumOfPictures = req.body.NumOfPictures;
-        const UUID = req.body.UUID;
         db.query(
-            "INSERT INTO `FormEntry` (`TypeOfEntry`, `PageOfError`, `URLOfError`, `WhatIsExpected`, `WhatDidHappen`, `NumOfPictures`, `UUID`) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [TypeOfError, PageOfError, URLOfError, WhatIsExpected, WhatDidHappen, NumOfPictures, UUID],
+            "INSERT INTO `FormEntry` (`TypeOfEntry`, `PageOfError`, `URLOfError`, `WhatIsExpected`, `WhatDidHappen`, `NumOfPictures`) VALUES (?, ?, ?, ?, ?, ?)",
+            [TypeOfError, PageOfError, URLOfError, WhatIsExpected, WhatDidHappen, NumOfPictures],
             (err, result) => {
                 console.log(`error message: ${err}`)
                 if (err) {
@@ -75,7 +74,7 @@ app.post("/InputFormEntry", async (req, res) => {
                     res.send({inserted: true, result})
                 }
                 else {
-                    res.send({inserted: false, result})
+                    res.send({inserted: true, result})
                 }
             }
         );
@@ -85,11 +84,12 @@ app.post("/InputFormEntry", async (req, res) => {
     }
 })
 app.post("/InputImages", async (req, res) => {
+    console.log(req.body)
     try {
         const Blob = req.body.Blob;
         const UUID = req.body.UUID;
         db.query(
-            "INSERT INTO `Pictures` (`PictureBlob`, `UUID`) VALUES (?, 9)",
+            "INSERT INTO `Pictures` (`PictureBlob`, `UUID`) VALUES (?, ?)",
             [Blob, UUID],
             (err, result) => {
                 console.log(`error message: ${err}`)
