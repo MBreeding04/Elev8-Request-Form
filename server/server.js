@@ -2,15 +2,14 @@ import express from "express"
 import mysql from "mysql"
 import cors from "cors"
 import * as dotenv from 'dotenv'
-import * as bodyParser from 'body-parser'
 dotenv.config()
 console.log(dotenv.config())
 const app = express();
 
 app.use(cors())
 
-app.use(express.raw({ type: 'application/octet-stream' }));
-
+app.use(express.raw({ type: 'application/octet-stream', limit: '5mb'}));
+app.use(express.json({limit: '5mb'})); // Add other middleware as needed
 const db = mysql.createConnection({
     host: 'sql9.freemysqlhosting.net',
     user: 'sql9678711',
@@ -71,43 +70,41 @@ app.post("/InputFormEntry", async (req, res) => {
                     res.send({ message: "None", err: err })
                 }
                 else if (result.length > 0) {
-                    res.send({inserted: true, result})
+                    res.send({ inserted: true, result })
                 }
                 else {
-                    res.send({inserted: true, result})
+                    res.send({ inserted: true, result })
                 }
             }
         );
     }
     catch (error) {
-        res.send({inserted: false, error})
+        res.send({ inserted: false, error })
     }
 })
 app.post("/InputImages", async (req, res) => {
-    console.log(req.body)
     try {
-        const Blob = req.body;
+        console.log('Request Body:', req.body);
+        const base64Data = req.body.Data; // Access the 'Data' property from the JSON object
+        const UUID = req.body.UUID
         db.query(
-            "INSERT INTO `Pictures` (`PictureBlob`, `UUID`) VALUES (?, 9)",
-            [Blob],
+            "INSERT INTO `Pictures` (`PictureBlob`, `UUID`) VALUES (?, ?)",
+            [base64Data, UUID],
             (err, result) => {
                 console.log(`error message: ${err}`)
                 if (err) {
                     res.send({ message: "None", err: err })
-                }
-                else if (result.length > 0) {
-                    res.send({inserted: true, result})
-                }
-                else {
-                    res.send({inserted: true, result})
+                } else if (result.length > 0) {
+                    res.send({ inserted: true, result })
+                } else {
+                    res.send({ inserted: true, result })
                 }
             }
         );
+    } catch (error) {
+        res.send({ inserted: false, error })
     }
-    catch (error) {
-        res.send({inserted: false, error})
-    }
-})
+});
 app.listen('5000', () => {
     console.log("Connected to server")
 }) 

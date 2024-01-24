@@ -1,4 +1,5 @@
-import { Box, Divider, TextField, Button } from "@mui/material";
+import { Box, Divider, TextField, Button, Modal, IconButton } from "@mui/material";
+import Alert, { AlertColor } from "@mui/material/Alert";
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -6,13 +7,11 @@ import FormControl from '@mui/material/FormControl';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import Axios from "axios";
 import { useState, useEffect } from "react";
+import CloseIcon from '@mui/icons-material/Close';
 import './Form.css'
-import { v4 as uuidv4 } from 'uuid';
-function generateUUID(): string {
-    return uuidv4();
-}
 function Form() {
-    const [TypeError, setTypeError] = useState<string>('');
+    //states to handle data
+    const [TypeError, setTypeError] = useState<string | undefined>(undefined);
     const [PageEntry, setPageEntry] = useState<string>('');
     const [URLEntry, SetURLEntry] = useState<string>('');
     const [WhatHappenedEntry, setWhatHappenedEntry] = useState<string>('');
@@ -20,7 +19,20 @@ function Form() {
     const [dragging, setDragging] = useState(false);
     const [Images, setImages] = useState<FileList>();
     const [CurrentUserId, setCurrentUserId] = useState<number>()
-
+    const [ToggledPopup, setToggledPopup] = useState<boolean>(false)
+    const [PopupMessage, setPopupMessage] = useState<string>('');
+    const [PopupColor, setPopupColor] = useState<AlertColor>('info');
+    const isUndefined = () =>{
+        if(TypeError === undefined){
+            return false
+        }
+    }
+    const validSeverityValues = ["error", "warning", "info", "success"];
+    const sanitizedPopupColor = validSeverityValues.includes(PopupColor) ? PopupColor : "info";
+    useEffect(() => {
+        console.log(TypeError)
+    },[TypeError])
+    //handles dropping of files into file drop zone
     useEffect(() => {
         const handleDragEnter = (e: DragEvent) => {
             e.preventDefault();
@@ -68,99 +80,137 @@ function Form() {
         };
 
     }, []);
+
+    //function to handle form submit, pushes to database and checks to see if images need to be inputted to database
     const HandleFormEntrySubmit = async () => {
+        const numOfPictures = () => {
+            if (Images === undefined || Images === null) {
+                return 0
+            }
+            else {
+                return Images!.length
+            }
+        }
         await Axios.post("http://localhost:5000/InputFormEntry", {
             TypeOfError: TypeError,
             PageOfError: PageEntry,
             URLOfError: URLEntry,
             WhatIsExpected: WhatHappenedEntry,
             WhatDidHappen: WhatDidHappenedEntry,
-            NumOfPictures: 5
+            NumOfPictures: numOfPictures()
         }).then(async (response) => {
             if (response.data.inserted === true) {
                 console.log('passed')
-                setCurrentUserId(response.data.result.insertId)
-                console.log('I inserted the data')
+                const newUserId = response.data.result.insertId;
+                // Log the currentUserId after setting it
+                if (Images === undefined) {
+                    console.log('no images need to be processed')
+                    setToggledPopup(true)
+                    setPopupMessage('Inputed data successfully!')
+                    setPopupColor('success')
+                }
+                else {
+                    setCurrentUserId(newUserId);
+                }
             }
             else {
-                console.log('not passed')
-                console.log(response)
+                setToggledPopup(true)
+                setPopupMessage('Something happened when contacting the server!')
+                setPopupColor('error')
             }
         }).catch(() => {
-            console.log('not passed')
+            setToggledPopup(true)
+            setPopupMessage('Something happened when contacting the server!')
+            setPopupColor('error')
         });
-        if (Images === undefined) {
-            console.log('no images need to be processed')
-        }
-        else {
-            handleImageEntries()
-        }
+        setPageEntry('')
+        setTypeError(undefined)
+        SetURLEntry('')
+        setWhatHappenedEntry('')
+        setWhatDidHappenedEntry('')
     }
+    //function to handle image files, nested is another function but only this function needs the nested function
     const handleImageEntries = async () => {
+        //threshold to trigger the popup
+        var threshold = Images!.length
+        var count = 0;
         for (let i = 0; i < Images!.length; i++) {
-            const submitImageData = async (binaryData: string | ArrayBuffer | null) => {
-                console.log('binary data inside submitImagedata:')
-                console.log(binaryData)
-                await Axios.post("http://localhost:5000/InputImages",
-                    {
-                        binaryData
-                    }, {
-                    headers: {
-                        'Content-Type': 'application/octet-stream'
-                    }
-                }
+            count++;
+            const submitImageData = async (binaryData: Blob) => {
+                try {
+                    // Convert Blob to Base64
+                    const reader = new FileReader();
+                    reader.onloadend = async () => {
+                        const base64Data = reader.result as string;
+                        // Your database insertion logic here...
 
-                ).then(async (response) => {
-                    console.log(response)
-                    if (response.data.inserted === true) {
-                        console.log('passed')
-                    }
-                    else {
-                        console.log('not passed')
-                        console.log(response.data)
-                    }
-                }).catch(() => {
-                    console.log('not passed')
-                });
-            }
-
-
-
-
-            //WIP
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                // The binary data of the uploaded file is available in e.target.result
-                const binaryData = e.target!.result;
-                console.log(binaryData);
-                //submitImageData(binaryData)
-                // You can use binaryData as needed, for example, display it as an image
-                if (binaryData !== null) {
-                    // Convert binaryData to a data URL
-                    const dataURL: string = (typeof binaryData === 'string')
-                        ? `data:image/jpeg;base64,${binaryData}`
-                        : `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(binaryData)))}`;
-                    // Create an img element and set its src attribute
-                    const imgElement: HTMLImageElement = document.createElement('img');
-                    imgElement.src = dataURL;
-
-                    // Append the img element to the imageContainer div
-                    const imageContainer: HTMLDivElement | null = document.getElementById('imageContainer') as HTMLDivElement | null;
-                    if (imageContainer) {
-                        imageContainer.appendChild(imgElement);
-                    }
+                        const response = await Axios.post(
+                            "http://localhost:5000/InputImages",
+                            {
+                                Data: base64Data,
+                                UUID: CurrentUserId
+                            },
+                            {
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            }
+                        );
+                        if (response.data.inserted === true) {
+                            console.log('Passed');
+                            setToggledPopup(true)
+                            setPopupMessage('Inputed data successfully!')
+                            setPopupColor('success')
+                        } else {
+                            console.log('Not Passed');
+                            setPopupMessage('Something happened when contacting the server!')
+                            setPopupColor('error')
+                        }
+                    };
+                    reader.readAsDataURL(binaryData);
+                } catch (error) {
+                    console.error('Error sending image data:', error);
+                    setPopupMessage('Something happened when contacting the server!')
+                    setPopupColor('error')
                 }
             };
-            // Read the file as a binary data
-            reader.readAsBinaryString(Images![i]);
-            //WIP
+            //converts file to blob data to push to database
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const binaryData = e.target!.result;
+                if (binaryData instanceof ArrayBuffer) {
+                    // Create a Blob from the ArrayBuffer
+                    const blob = new Blob([new Uint8Array(binaryData)], { type: 'image/png' });
 
+                    // Send the image data
+                    await submitImageData(blob);
+                }
+                else {
+                    console.error('Invalid binary data format.');
+                    setToggledPopup(true)
+                    setPopupMessage('Invalid file type or size, Please input pngs and make sure they are less than 5mb!')
+                    setPopupColor('error')
+                }
+            };
 
-
-
-
+            // Read the file as binary data using readAsArrayBuffer
+            reader.readAsArrayBuffer(Images![i]);
         }
-    }
+        if (threshold === count) {
+            setToggledPopup(true)
+            setPageEntry('')
+            setTypeError(undefined)
+            SetURLEntry('')
+            setWhatHappenedEntry('')
+            setWhatDidHappenedEntry('')
+        }
+    };
+    //fired when CurrentUserId is updated, CurrentUserId only updates if there are files present
+    useEffect(() => {
+        if (CurrentUserId !== undefined) {
+            handleImageEntries();
+        }
+    }, [CurrentUserId]);
     return (
         <Box className='Form'>
             <Box className='SubHeaders'>
@@ -176,34 +226,33 @@ function Form() {
                     <FormControl>
                         <RadioGroup
                             aria-labelledby="demo-radio-buttons-group-label"
-                            defaultValue="female"
                             name="radio-buttons-group"
                             onChange={(e) => {
                                 setTypeError(e.target.value)
                             }}
+                            value={TypeError}
                         >
-
-                            <FormControlLabel className="Questions" value="Error" control={<Radio sx={{
+                            <FormControlLabel className="Questions" value="Error" checked={isUndefined()} control={<Radio sx={{
                                 '&, &.Mui-checked': {
                                     color: '#F60',
                                 },
                             }} />} label="Error" />
-                            <FormControlLabel className="Questions" value="Defect" control={<Radio sx={{
+                            <FormControlLabel className="Questions" value="Defect" checked={isUndefined()} control={<Radio sx={{
                                 '&, &.Mui-checked': {
                                     color: '#F60',
                                 },
                             }} />} label="Defect" />
-                            <FormControlLabel className="Questions" value="Failure" control={<Radio sx={{
+                            <FormControlLabel className="Questions" value="Failure" checked={isUndefined()} control={<Radio sx={{
                                 '&, &.Mui-checked': {
                                     color: '#F60',
                                 },
                             }} />} label="Failure" />
-                            <FormControlLabel className="Questions" value="UI Feature" control={<Radio sx={{
+                            <FormControlLabel className="Questions" value="UI Feature" checked={isUndefined()}  control={<Radio sx={{
                                 '&, &.Mui-checked': {
                                     color: '#F60',
                                 },
                             }} />} label="UI Feature" />
-                            <FormControlLabel className="Questions" value="Logic Feature" control={<Radio sx={{
+                            <FormControlLabel className="Questions" value="Logic Feature" checked={isUndefined()} control={<Radio sx={{
                                 '&, &.Mui-checked': {
                                     color: '#F60',
                                 },
@@ -220,7 +269,7 @@ function Form() {
                     </Box>
                     <TextField variant="outlined" onChange={(e) => {
                         setPageEntry(e.target.value)
-                    }} />
+                    }} value={PageEntry}/>
                 </Box>
             </Box>
             <Box className='questionContainer'>
@@ -231,7 +280,7 @@ function Form() {
                     </Box>
                     <TextField variant="outlined" onChange={(e) => {
                         SetURLEntry(e.target.value)
-                    }} />
+                    }} value={URLEntry} />
                 </Box>
             </Box>
             <Box className='questionContainer'>
@@ -248,6 +297,7 @@ function Form() {
                         onChange={(e) => {
                             setWhatHappenedEntry(e.target.value)
                         }}
+                        value={WhatHappenedEntry}
                     />
                 </Box>
             </Box>
@@ -265,6 +315,7 @@ function Form() {
                         onChange={(e) => {
                             setWhatDidHappenedEntry(e.target.value)
                         }}
+                        value={WhatDidHappenedEntry}
                     />
                 </Box>
             </Box>
@@ -291,7 +342,25 @@ function Form() {
                     bgcolor: '#CD5200',
                 }
             }} variant="contained"><Box className='Submit'>Submit</Box></Button>
-            <div id="imageContainer"></div>
+            <Modal className="StatusPopup" open={ToggledPopup} onClose={() => { setToggledPopup(false) }}>
+                <Box className='StatusContainer'>
+                    <Box className='StatusHeader'>
+                        <IconButton onClick={()=>{setToggledPopup(false)}}><CloseIcon></CloseIcon></IconButton>
+                    </Box>
+                    <Divider></Divider>
+                    <Alert severity={sanitizedPopupColor}>
+                        {PopupMessage}
+                    </Alert>
+                    <Button onClick={() => {
+                        setToggledPopup(false)
+                    }} sx={{
+                        m:'12px',
+                        bgcolor: '#F60', ':hover': {
+                            bgcolor: '#CD5200',
+                        }
+                    }} variant="contained"><Box className='Submit'>Ok</Box></Button>
+                </Box>
+            </Modal>
         </Box>
     );
 }
