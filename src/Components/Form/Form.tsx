@@ -143,10 +143,11 @@ function Form() {
                         const response = await Axios.post(
                             "http://localhost:5000/InputImages",
                             {
-                                Data: base64Data,
+                                Data: base64Data.toString(),
                                 UUID: CurrentUserId
                             },
                             {
+                                responseType: 'blob', 
                                 headers: {
                                     'Content-Type': 'application/json'
                                 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, Icon, IconButton, Menu, Modal, Button } from "@mui/material";
+import { Box, IconButton, Menu, Modal, Button } from "@mui/material";
 import Carousel from "react-material-ui-carousel";
 import AdminDropdown from "../AdminDropdown/AdminDropdown";
 import MenuIcon from '@mui/icons-material/Menu';
@@ -17,7 +17,8 @@ import PieChart from '../Piechart/Piechart'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArticleIcon from '@mui/icons-material/Article';
 import Axios from "axios";
-interface DummyData {
+import { PictureInPictureAlt } from "@mui/icons-material";
+interface PercentData {
     percent: string
     header: string
 }
@@ -29,50 +30,15 @@ interface FormEntries {
     WhatDidHappen: string
     WhatExpectHappen: string
     NumOfPictures: string
-}
-function createData(
-    name: string,
-    calories: number,
-    fat: number,
-    carbs: number,
-    protein: number,
-) {
-    return { name, calories, fat, carbs, protein };
+    PictureElement: JSX.Element | undefined
 }
 
-const rows = [
-    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData('Eclair', 262, 16.0, 24, 6.0),
-    createData('Cupcake', 305, 3.7, 67, 4.3),
-    createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
+
 function AdminPageView() {
-    const dummy: DummyData[] = [
-        {
-            percent: '25%',
-            header: 'Error'
-        },
-        {
-            percent: '3%',
-            header: 'Defect'
-        },
-        {
-            percent: '19%',
-            header: 'Failure'
-        },
-        {
-            percent: '34%',
-            header: 'UI Feature'
-        },
-        {
-            percent: '19%',
-            header: 'Logic Feature'
-        },
-    ]
+    const [PictureElements, setPictureElements] = useState<JSX.Element>()
+    const [Percents, setPercents] = useState<PercentData[]>([])
     const chartLabels = ['Error', 'Defect', 'Failure', 'UI Feature', 'Logic Feature'];
     const [ChartData, setChartData] = useState<number[]>([])
-    const [dummydata, setdummydata] = useState(dummy)
     const [ToggledMenu, setToggledMenu] = useState<boolean>(false);
     const [ToggledPopup, setToggledPopup] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -80,47 +46,111 @@ function AdminPageView() {
     const [Mode, setMode] = useState(false);
     const [initialLoad, setInitialLoad] = useState(true);
     const [CurrentColors, setCurrentColors] = useState({ Main: 'temp', Stroke: 'temp', Header: 'temp', Accent: 'temp', TextColor: 'temp', Contrast: 'temp' });
-    
+
     const AddToFormEntriesArray = (newValue: FormEntries) => {
         setRow((prevArray) => [...prevArray, newValue]);
     };
     const QueryForFormEntries = async () => {
         await Axios.post("http://localhost:5000/PullAllEntries", {
         }).then(async (response) => {
-            setRow([]);
-            for (let i = 0; i < response.data.result.length; i++) {
-                const entry = response.data.result[i];
-                const Id = entry.EntryId
-                const Type = entry.TypeOfEntry;
-                const Page = entry.PageOfError;
-                const URL = entry.URLOfError;
-                const WhatDidHappen = entry.WhatDidHappen;
-                const WhatExpectHappen = entry.WhatIsExpected;
-                const NumOfPictures = entry.NumOfPictures;
-                const newFormEntry: FormEntries = { EntryId: Id, Type: Type, Page: Page, URL: URL, WhatDidHappen: WhatDidHappen, WhatExpectHappen: WhatExpectHappen, NumOfPictures: NumOfPictures }
-                AddToFormEntriesArray(newFormEntry)
-                
+            if (response.data.returned === true) {
+                setRow([])
+                for (let i = 0; i < response.data.result.length; i++) {
+                    const entry = response.data.result[i];
+                    const Id = entry.EntryId
+                    const Type = entry.TypeOfEntry;
+                    const Page = entry.PageOfError;
+                    const URL = entry.URLOfError;
+                    const WhatDidHappen = entry.WhatDidHappen;
+                    const WhatExpectHappen = entry.WhatIsExpected;
+                    const NumOfPictures = entry.NumOfPictures;
+                    const newFormEntry: FormEntries = { EntryId: Id, Type: Type, Page: Page, URL: URL, WhatDidHappen: WhatDidHappen, WhatExpectHappen: WhatExpectHappen, NumOfPictures: NumOfPictures, PictureElement: (<div>{Id}</div>) }
+                    AddToFormEntriesArray(newFormEntry)
+                    if(NumOfPictures > 0){
+                        PullPictures(Id)
+                    }
+                }
             }
-        }).then(()=>{
-            CalculateChartData()
+            else {
+
+            }
         }).catch((error) => {
             console.error(error)
         })
-        
+
     }
-    const CalculateChartData = () =>{
+    //function to pull pictures by the EntryId, data is a file when pulled from database, inside of the file is the base64 Data URL that displays the image
+    //is only called if NumOfPictures > 0
+    const PullPictures = async (EntryId: number) => {
+        await Axios.post("http://localhost:5000/PullPicturesById", {
+            EntryId: EntryId
+        }).then(async (response) => {
+            console.log(response)
+            for (let i = 0; i < response.data.result.length; i++) {
+                // Assuming the received data is a Uint8Array
+                const binaryDataInitial: Uint8Array = response.data.result[i].PictureBlob.data;
+
+                // Convert the Uint8Array to a regular array (number[])
+                const binaryArray: number[] = Array.from(binaryDataInitial);
+
+                // Convert the binary data to a base64-encoded string
+                const base64String = btoa(String.fromCharCode(...binaryArray));
+                console.log('Raw Base64 string:', base64String);
+                const binaryString: string = atob(base64String);
+
+                // Convert binary string to Uint8Array
+                const binaryData: Uint8Array = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    binaryData[i] = binaryString.charCodeAt(i);
+                }
+
+                // Step 2: Create a Blob from the binary data
+                const blob: Blob = new Blob([binaryData], { type: 'application/octet-stream' });
+
+                // Step 3: Create a FileReader to read the content of the Blob
+                const fileReader: FileReader = new FileReader();
+
+                fileReader.onload = (event) => {
+                    // Step 4: Access the text content
+                    const textContent: string = event.target?.result as string;
+
+                    // Now you can use the 'textContent' variable, which contains the text from the file
+                    console.log(textContent);
+                    setPictureElements(<div>you have a picture with id of: {EntryId}</div>)
+                };
+
+                // Step 5: Read the Blob as text
+                fileReader.readAsText(blob);
+            }
+        })
+    }
+    //counts each iteration of each type of error, and calculates percentages
+    const CalculateChartData = () => {
         var chartNumber = [0, 0, 0, 0, 0]
+        var percentages = ['', '', '', '', '']
+        var PercentObject: PercentData[] = []
+        var total: number = 0
         console.log(Row.length)
-        for(let i = 0; i < Row.length; i++){
-            for(let j = 0; j < chartLabels.length; j++){
-                if(Row[i].Type === chartLabels[j]){
+        for (let i = 0; i < Row.length; i++) {
+            for (let j = 0; j < chartLabels.length; j++) {
+                if (Row[i].Type === chartLabels[j]) {
                     chartNumber[j]++
                 }
             }
         }
-        console.log(chartNumber.toString())
+        for (let i = 0; i < chartNumber.length; i++) {
+            total += chartNumber[i]
+        }
+        for (let i = 0; i < chartNumber.length; i++) {
+            var temp: number = 0
+            temp = (chartNumber[i] / total) * 100
+            percentages[i] = +temp.toFixed(2) + '%'
+            PercentObject[i] = { percent: percentages[i], header: chartLabels[i] }
+        }
+        setPercents(PercentObject)
         setChartData(chartNumber)
     }
+
     const LightPallete = {
         Main: "#F9F9F9",
         Stroke: "#787878",
@@ -153,9 +183,9 @@ function AdminPageView() {
             setInitialLoad(false);
         }
     }, [])
-    
-    
-    
+
+
+
     return (
         <Box className="AdminMainBody" sx={{ bgcolor: CurrentColors.Main }}>
             <Box className="Header" sx={{ bgcolor: CurrentColors.Header }}>
@@ -173,7 +203,7 @@ function AdminPageView() {
             <Box className="AdminContainer">
                 <Box className='leftSide'>
                     <Carousel className="Carousel">
-                        {dummydata.map((iteration) => (
+                        {Percents.map((iteration) => (
                             <Box className="PercentCards"><Box className="percentNums">{iteration.percent}</Box><Box className="PercentHeaders">{iteration.header}'s</Box></Box>
                         ))}
                     </Carousel>
@@ -206,12 +236,12 @@ function AdminPageView() {
                                             <TableCell align="left" component="th" scope="row">
                                                 <Box className="AdminTableData" >{row.Type}</Box>
                                             </TableCell>
-                                            <TableCell><Box className="AdminTableData" >{row.Page}</Box></TableCell>
+                                            <TableCell align="center"><Box className="AdminTableData" >{row.Page}</Box></TableCell>
                                             <TableCell align="center"><Box className="AdminTableData" >{row.URL}</Box></TableCell>
                                             <TableCell align="center"><Box className="AdminTableData" >{row.WhatExpectHappen}</Box></TableCell>
                                             <TableCell align="center"><Box className="AdminTableData" >{row.WhatDidHappen}</Box></TableCell>
                                             <TableCell align="center"><Box className="AdminTableData" >{row.NumOfPictures}</Box></TableCell>
-                                            <TableCell align="center"><Box className="AdminTableData" ></Box></TableCell>
+                                            <TableCell align="center"><Box className="AdminTableData" >{row.PictureElement}</Box></TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>

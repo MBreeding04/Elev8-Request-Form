@@ -8,8 +8,8 @@ const app = express();
 
 app.use(cors())
 
-app.use(express.raw({ type: 'application/octet-stream', limit: '5mb'}));
-app.use(express.json({limit: '5mb'})); // Add other middleware as needed
+app.use(express.raw({ type: 'application/octet-stream', limit: '5mb' }));
+app.use(express.json({ limit: '5mb' })); // Add other middleware as needed
 const db = mysql.createConnection({
     host: 'sql9.freemysqlhosting.net',
     user: 'sql9678711',
@@ -109,6 +109,28 @@ app.post("/PullAllEntries", async (req, res) => {
     try {
         db.query(
             "SELECT FormEntry.EntryId, FormEntry.TypeOfEntry, FormEntry.PageOfError, FormEntry.URLOfError, FormEntry.WhatIsExpected, FormEntry.WhatDidHappen, FormEntry.NumOfPictures, GROUP_CONCAT(Pictures.PictureId) AS PictureIds FROM FormEntry LEFT JOIN Pictures ON FormEntry.EntryId = Pictures.UUID GROUP BY FormEntry.EntryId, FormEntry.TypeOfEntry, FormEntry.PageOfError, FormEntry.URLOfError, FormEntry.WhatIsExpected, FormEntry.WhatDidHappen, FormEntry.NumOfPictures",
+            (err, result) => {
+                console.log(`error message: ${err}`)
+                if (err) {
+                    res.send({ message: "None", err: err })
+                } else if (result.length > 0) {
+                    res.send({ returned: true, result })
+                } else {
+                    res.send({ returned: true, result })
+                }
+            }
+        );
+    } catch (error) {
+        res.send({ returned: false, error })
+    }
+});
+app.post("/PullPicturesById", async (req, res) => {
+    try {
+        const EntryId = req.body.EntryId
+        console.log(EntryId)
+        db.query(
+            "SELECT PictureBlob FROM Pictures Where UUID = ?",
+            [EntryId],
             (err, result) => {
                 console.log(`error message: ${err}`)
                 if (err) {
