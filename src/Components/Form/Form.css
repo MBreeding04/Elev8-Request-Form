@@ -67,6 +67,9 @@
     background: #FFF;
     margin-bottom: 24px;
 }
+.SubmitDocuments:hover{
+    background: #78787818
+}
 
 .gray {
     padding-top: 64px;

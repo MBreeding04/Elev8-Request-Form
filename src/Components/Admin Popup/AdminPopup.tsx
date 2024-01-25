@@ -58,7 +58,7 @@ function AdminPopup({ setToggledPopup, ToggledPopup }: PopupProps) {
                 UserName
                 <TextField sx={{ pb: '16px' }} variant="outlined" onChange={(e)=>{HandleUserName(e)}} />
                 Password
-                <TextField sx={{ pb: '16px' }} variant="outlined" onChange={(e)=>{HandlePassword(e)}} />
+                <TextField type='password' sx={{ pb: '16px' }} variant="outlined" onChange={(e)=>{HandlePassword(e)}} />
                 <Button onClick={()=>{
                     HandleSubmit()
                 }} sx={{

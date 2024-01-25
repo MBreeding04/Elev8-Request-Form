@@ -12,6 +12,7 @@ function App() {
       <Routes>
         <Route path='/' element={<UserView></UserView>} />
         <Route path='/AdminPage' element={<AdminPageView></AdminPageView>} />
+        <Route path='/FormsTable' element={<div></div>} />
       </Routes>
     </HashRouter>
   );

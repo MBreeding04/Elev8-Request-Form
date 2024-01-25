@@ -22,16 +22,13 @@ function Form() {
     const [ToggledPopup, setToggledPopup] = useState<boolean>(false)
     const [PopupMessage, setPopupMessage] = useState<string>('');
     const [PopupColor, setPopupColor] = useState<AlertColor>('info');
-    const isUndefined = () =>{
-        if(TypeError === undefined){
+    const isUndefined = () => {
+        if (TypeError === undefined) {
             return false
         }
     }
     const validSeverityValues = ["error", "warning", "info", "success"];
     const sanitizedPopupColor = validSeverityValues.includes(PopupColor) ? PopupColor : "info";
-    useEffect(() => {
-        console.log(TypeError)
-    },[TypeError])
     //handles dropping of files into file drop zone
     useEffect(() => {
         const handleDragEnter = (e: DragEvent) => {
@@ -82,7 +79,8 @@ function Form() {
     }, []);
 
     //function to handle form submit, pushes to database and checks to see if images need to be inputted to database
-    const HandleFormEntrySubmit = async () => {
+    const HandleFormEntrySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
         const numOfPictures = () => {
             if (Images === undefined || Images === null) {
                 return 0
@@ -142,8 +140,6 @@ function Form() {
                     const reader = new FileReader();
                     reader.onloadend = async () => {
                         const base64Data = reader.result as string;
-                        // Your database insertion logic here...
-
                         const response = await Axios.post(
                             "http://localhost:5000/InputImages",
                             {
@@ -217,6 +213,7 @@ function Form() {
                 Bug/Feature Request
             </Box>
             <Divider variant="middle" color='#FF6600'></Divider>
+            <form onSubmit={HandleFormEntrySubmit}>
             <Box className='questionContainer'>
                 <Box className='Headers'>1.</Box>
                 <Box className='questionInput'>
@@ -227,6 +224,7 @@ function Form() {
                         <RadioGroup
                             aria-labelledby="demo-radio-buttons-group-label"
                             name="radio-buttons-group"
+                            aria-required="true"
                             onChange={(e) => {
                                 setTypeError(e.target.value)
                             }}
@@ -247,7 +245,7 @@ function Form() {
                                     color: '#F60',
                                 },
                             }} />} label="Failure" />
-                            <FormControlLabel className="Questions" value="UI Feature" checked={isUndefined()}  control={<Radio sx={{
+                            <FormControlLabel className="Questions" value="UI Feature" checked={isUndefined()} control={<Radio sx={{
                                 '&, &.Mui-checked': {
                                     color: '#F60',
                                 },
@@ -261,91 +259,94 @@ function Form() {
                     </FormControl>
                 </Box>
             </Box>
-            <Box className='questionContainer'>
-                <Box className='Headers'>2.</Box>
-                <Box className='questionInput'>
-                    <Box className='Questions'>
-                        What page is the error/feature being performed on?
+            
+                <Box className='questionContainer'>
+                    <Box className='Headers'>2.</Box>
+                    <Box className='questionInput'>
+                        <Box className='Questions'>
+                            What page is the error/feature being performed on?
+                        </Box>
+                        <TextField required variant="outlined" onChange={(e) => {
+                            setPageEntry(e.target.value)
+                        }} value={PageEntry} />
                     </Box>
-                    <TextField variant="outlined" onChange={(e) => {
-                        setPageEntry(e.target.value)
-                    }} value={PageEntry}/>
                 </Box>
-            </Box>
-            <Box className='questionContainer'>
-                <Box className='Headers'>3.</Box>
-                <Box className='questionInput'>
-                    <Box className='Questions'>
-                        What is the URL of the page?
+                <Box className='questionContainer'>
+                    <Box className='Headers'>3.</Box>
+                    <Box className='questionInput'>
+                        <Box className='Questions'>
+                            What is the URL of the page?
+                        </Box>
+                        <TextField required variant="outlined" onChange={(e) => {
+                            SetURLEntry(e.target.value)
+                        }} value={URLEntry} />
                     </Box>
-                    <TextField variant="outlined" onChange={(e) => {
-                        SetURLEntry(e.target.value)
-                    }} value={URLEntry} />
                 </Box>
-            </Box>
-            <Box className='questionContainer'>
-                <Box className='Headers'>4.</Box>
-                <Box className='questionInput'>
-                    <Box className='Questions'>
-                        What do you expect to happen?
+                <Box className='questionContainer'>
+                    <Box className='Headers'>4.</Box>
+                    <Box className='questionInput'>
+                        <Box className='Questions'>
+                            What do you expect to happen?
+                        </Box>
+                        <TextField
+                            id="filled-multiline-static"
+                            multiline
+                            rows={6}
+                            variant="outlined"
+                            required
+                            onChange={(e) => {
+                                setWhatHappenedEntry(e.target.value)
+                            }}
+                            value={WhatHappenedEntry}
+                        />
                     </Box>
-                    <TextField
-                        id="filled-multiline-static"
-                        multiline
-                        rows={6}
-                        variant="outlined"
-                        onChange={(e) => {
-                            setWhatHappenedEntry(e.target.value)
-                        }}
-                        value={WhatHappenedEntry}
-                    />
                 </Box>
-            </Box>
-            <Box className='questionContainer'>
-                <Box className='Headers'>5.</Box>
-                <Box className='questionInput'>
-                    <Box className='Questions'>
-                        What did happen?
+                <Box className='questionContainer'>
+                    <Box className='Headers'>5.</Box>
+                    <Box className='questionInput'>
+                        <Box className='Questions'>
+                            What did happen?
+                        </Box>
+                        <TextField
+                            id="filled-multiline-static"
+                            multiline
+                            rows={6}
+                            variant="outlined"
+                            required
+                            onChange={(e) => {
+                                setWhatDidHappenedEntry(e.target.value)
+                            }}
+                            value={WhatDidHappenedEntry}
+                        />
                     </Box>
-                    <TextField
-                        id="filled-multiline-static"
-                        multiline
-                        rows={6}
-                        variant="outlined"
-                        onChange={(e) => {
-                            setWhatDidHappenedEntry(e.target.value)
-                        }}
-                        value={WhatDidHappenedEntry}
-                    />
                 </Box>
-            </Box>
-            <Box className='questionContainer'>
-                <Box className='Headers'>6.</Box>
-                <Box className='DocumentInput'>
-                    <Box className='Questions'>
-                        Please submit pictures of the error/feature:
-                    </Box>
-                    <Box className='SubmitDocuments' id='dropZone'>
+                <Box className='questionContainer'>
+                    <Box className='Headers'>6.</Box>
+                    <Box className='DocumentInput'>
+                        <Box className='Questions'>
+                            Please submit pictures of the error/feature:
+                        </Box>
+                        <Box className='SubmitDocuments' id='dropZone'>
 
-                        <Box className='gray'>
-                            Drag and Drop files here or browse to upload.
-                            <FileUploadIcon sx={{ alignSelf: 'center' }}></FileUploadIcon>
+                            <Box className='gray'>
+                                Drag and Drop files here or browse to upload.
+                                (5mb upload limit for each picture)
+                                <FileUploadIcon sx={{ alignSelf: 'center' }}></FileUploadIcon>
+                            </Box>
                         </Box>
                     </Box>
                 </Box>
-            </Box>
-            <Button onClick={() => {
-                HandleFormEntrySubmit()
-            }} sx={{
-                width: '100%',
-                bgcolor: '#F60', ':hover': {
-                    bgcolor: '#CD5200',
-                }
-            }} variant="contained"><Box className='Submit'>Submit</Box></Button>
+                <Button type="submit" sx={{
+                    width: '100%',
+                    bgcolor: '#F60', ':hover': {
+                        bgcolor: '#CD5200',
+                    }
+                }} variant="contained" disabled={!TypeError}><Box className='Submit'>Submit</Box></Button>
+            </form>
             <Modal className="StatusPopup" open={ToggledPopup} onClose={() => { setToggledPopup(false) }}>
                 <Box className='StatusContainer'>
                     <Box className='StatusHeader'>
-                        <IconButton onClick={()=>{setToggledPopup(false)}}><CloseIcon></CloseIcon></IconButton>
+                        <IconButton onClick={() => { setToggledPopup(false) }}><CloseIcon></CloseIcon></IconButton>
                     </Box>
                     <Divider></Divider>
                     <Alert severity={sanitizedPopupColor}>
@@ -354,7 +355,7 @@ function Form() {
                     <Button onClick={() => {
                         setToggledPopup(false)
                     }} sx={{
-                        m:'12px',
+                        m: '12px',
                         bgcolor: '#F60', ':hover': {
                             bgcolor: '#CD5200',
                         }

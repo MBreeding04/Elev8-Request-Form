@@ -16,9 +16,19 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import PieChart from '../Piechart/Piechart'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArticleIcon from '@mui/icons-material/Article';
+import Axios from "axios";
 interface DummyData {
     percent: string
     header: string
+}
+interface FormEntries {
+    EntryId: number
+    Type: string
+    Page: string
+    URL: string
+    WhatDidHappen: string
+    WhatExpectHappen: string
+    NumOfPictures: string
 }
 function createData(
     name: string,
@@ -31,16 +41,6 @@ function createData(
 }
 
 const rows = [
-    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData('Eclair', 262, 16.0, 24, 6.0),
-    createData('Cupcake', 305, 3.7, 67, 4.3),
-    createData('Gingerbread', 356, 16.0, 49, 3.9),
-    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData('Eclair', 262, 16.0, 24, 6.0),
-    createData('Cupcake', 305, 3.7, 67, 4.3),
-    createData('Gingerbread', 356, 16.0, 49, 3.9),
     createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
     createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
     createData('Eclair', 262, 16.0, 24, 6.0),
@@ -70,15 +70,57 @@ function AdminPageView() {
             header: 'Logic Feature'
         },
     ]
-    const chartData = [25, 19, 3, 34, 19];
-    const chartLabels = ['Error', 'Defect', 'Failures', 'UI Features', 'Logic Features'];
-
+    const chartLabels = ['Error', 'Defect', 'Failure', 'UI Feature', 'Logic Feature'];
+    const [ChartData, setChartData] = useState<number[]>([])
     const [dummydata, setdummydata] = useState(dummy)
     const [ToggledMenu, setToggledMenu] = useState<boolean>(false);
     const [ToggledPopup, setToggledPopup] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [Row, setRow] = useState<FormEntries[]>([]);
     const [Mode, setMode] = useState(false);
+    const [initialLoad, setInitialLoad] = useState(true);
     const [CurrentColors, setCurrentColors] = useState({ Main: 'temp', Stroke: 'temp', Header: 'temp', Accent: 'temp', TextColor: 'temp', Contrast: 'temp' });
+    
+    const AddToFormEntriesArray = (newValue: FormEntries) => {
+        setRow((prevArray) => [...prevArray, newValue]);
+    };
+    const QueryForFormEntries = async () => {
+        await Axios.post("http://localhost:5000/PullAllEntries", {
+        }).then(async (response) => {
+            setRow([]);
+            for (let i = 0; i < response.data.result.length; i++) {
+                const entry = response.data.result[i];
+                const Id = entry.EntryId
+                const Type = entry.TypeOfEntry;
+                const Page = entry.PageOfError;
+                const URL = entry.URLOfError;
+                const WhatDidHappen = entry.WhatDidHappen;
+                const WhatExpectHappen = entry.WhatIsExpected;
+                const NumOfPictures = entry.NumOfPictures;
+                const newFormEntry: FormEntries = { EntryId: Id, Type: Type, Page: Page, URL: URL, WhatDidHappen: WhatDidHappen, WhatExpectHappen: WhatExpectHappen, NumOfPictures: NumOfPictures }
+                AddToFormEntriesArray(newFormEntry)
+                
+            }
+        }).then(()=>{
+            CalculateChartData()
+        }).catch((error) => {
+            console.error(error)
+        })
+        
+    }
+    const CalculateChartData = () =>{
+        var chartNumber = [0, 0, 0, 0, 0]
+        console.log(Row.length)
+        for(let i = 0; i < Row.length; i++){
+            for(let j = 0; j < chartLabels.length; j++){
+                if(Row[i].Type === chartLabels[j]){
+                    chartNumber[j]++
+                }
+            }
+        }
+        console.log(chartNumber.toString())
+        setChartData(chartNumber)
+    }
     const LightPallete = {
         Main: "#F9F9F9",
         Stroke: "#787878",
@@ -103,12 +145,17 @@ function AdminPageView() {
         }
     }, [Mode])
     useEffect(() => {
-        if (Mode === false) {
-            setCurrentColors(LightPallete);
-        } else {
-            setCurrentColors(DarkPallete);
+        CalculateChartData();
+    }, [Row]);
+    useEffect(() => {
+        if (initialLoad) {
+            QueryForFormEntries()
+            setInitialLoad(false);
         }
     }, [])
+    
+    
+    
     return (
         <Box className="AdminMainBody" sx={{ bgcolor: CurrentColors.Main }}>
             <Box className="Header" sx={{ bgcolor: CurrentColors.Header }}>
@@ -130,7 +177,7 @@ function AdminPageView() {
                             <Box className="PercentCards"><Box className="percentNums">{iteration.percent}</Box><Box className="PercentHeaders">{iteration.header}'s</Box></Box>
                         ))}
                     </Carousel>
-                    <Box className="ChartBox"><PieChart data={chartData} labels={chartLabels} /></Box>
+                    <Box className="ChartBox"><PieChart data={ChartData} labels={chartLabels} /></Box>
                 </Box>
                 <Box className='RightSide'>
                     <Box className="ActiveCard">
@@ -138,29 +185,33 @@ function AdminPageView() {
                     </Box>
                     <Box className='BottomRightSide'>
                         <TableContainer component={Paper}>
-                            <Table sx={{ minWidth: 650}} aria-label="simple table">
+                            <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell><Box className="AdminTableHeaders">Dessert (100g serving)</Box></TableCell>
-                                        <TableCell align="right"><Box className="AdminTableHeaders">Calories</Box></TableCell>
-                                        <TableCell align="right"><Box className="AdminTableHeaders">Fat&nbsp;(g)</Box></TableCell>
-                                        <TableCell align="right"><Box className="AdminTableHeaders">Carbs&nbsp;(g)</Box></TableCell>
-                                        <TableCell align="right"><Box className="AdminTableHeaders">Protein&nbsp;(g)</Box></TableCell>
+                                        <TableCell align="left"><Box className="AdminTableHeaders">Type</Box></TableCell>
+                                        <TableCell align="center"><Box className="AdminTableHeaders">Page</Box></TableCell>
+                                        <TableCell align="center"><Box className="AdminTableHeaders">URL</Box></TableCell>
+                                        <TableCell align="center"><Box className="AdminTableHeaders">What you expect to happen</Box></TableCell>
+                                        <TableCell align="center"><Box className="AdminTableHeaders">What did happen</Box></TableCell>
+                                        <TableCell align="center"><Box className="AdminTableHeaders">Number of pictures</Box></TableCell>
+                                        <TableCell align="center"><Box className="AdminTableHeaders">Pictures</Box></TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {rows.map((row) => (
+                                    {Row.map((row) => (
                                         <TableRow
-                                            key={row.name}
+                                            key={row.EntryId}
                                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                         >
-                                            <TableCell component="th" scope="row">
-                                            <Box className="AdminTableData" >{row.name}</Box>
+                                            <TableCell align="left" component="th" scope="row">
+                                                <Box className="AdminTableData" >{row.Type}</Box>
                                             </TableCell>
-                                            <TableCell align="right"><Box className="AdminTableData" >{row.calories}</Box></TableCell>
-                                            <TableCell align="right"><Box className="AdminTableData" >{row.fat}</Box></TableCell>
-                                            <TableCell align="right"><Box className="AdminTableData" >{row.carbs}</Box></TableCell>
-                                            <TableCell align="right"><Box className="AdminTableData" >{row.protein}</Box></TableCell>
+                                            <TableCell><Box className="AdminTableData" >{row.Page}</Box></TableCell>
+                                            <TableCell align="center"><Box className="AdminTableData" >{row.URL}</Box></TableCell>
+                                            <TableCell align="center"><Box className="AdminTableData" >{row.WhatExpectHappen}</Box></TableCell>
+                                            <TableCell align="center"><Box className="AdminTableData" >{row.WhatDidHappen}</Box></TableCell>
+                                            <TableCell align="center"><Box className="AdminTableData" >{row.NumOfPictures}</Box></TableCell>
+                                            <TableCell align="center"><Box className="AdminTableData" ></Box></TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
