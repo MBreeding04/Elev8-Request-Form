@@ -10,11 +10,11 @@ app.use(cors())
 app.use(express.raw({ type: 'application/octet-stream', limit: '5mb' }));
 app.use(express.json({ limit: '5mb' })); // Add other middleware as needed
 const db = mysql.createConnection({
-    host: process.env.REACT_APP_HOST,
-    user: process.env.REACT_APP_USER,
-    password: process.env.REACT_APP_PASSWORD,
-    database: process.env.REACT_APP_DATABASE,
-    port: process.env.REACT_APP_PORT
+    host: 'sql9.freemysqlhosting.net',
+    user: 'sql9678711',
+    password: 'dUyhpX35jf',
+    database: 'sql9678711',
+    port: '3306'
 })
 db.connect((err) => {
     if (err) {
