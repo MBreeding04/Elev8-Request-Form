@@ -213,11 +213,10 @@ function Form() {
     const SendToGithub = async (isPicture: boolean) => {
         const username = 'MBreeding04';
         const repo = 'Pawns-And-Puzzles-Website';
-        const token = process.env.REACT_APP_TOKEN;
+        const token = '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';
         const apiUrl = `https://api.github.com/repos/${username}/${repo}/issues`;
     
         // Add your actual label here
-        const labelName = 'your-label-name';
     
         const PreBody = `Type:  ${TypeError}
             Page:  ${PageEntry}
@@ -252,7 +251,7 @@ function Form() {
         const issueData = {
             title: 'Bug/Feature Request',
             body: `${PreBody}\n${ImageBody}`,
-            labels: [labelName], // Replace with the actual label name
+            labels: [TypeError], // Replace with the actual label name
         };
     
         const headers = {
@@ -278,19 +277,6 @@ function Form() {
         }
     };
     
-    // Helper function to read file as data URL
-    const readAsDataURL = (file: any) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                resolve(event.target!.result);
-            };
-            reader.onerror = (error) => {
-                reject(error);
-            };
-            reader.readAsDataURL(file);
-        });
-    };
     return (
         <Box className='Form'>
             <Box className='SubHeaders'>
