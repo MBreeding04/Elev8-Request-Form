@@ -1,0 +1,55 @@
+.TablePicturesModal {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.StatusContainer {
+    width: auto;
+    height: auto;
+}
+
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    width: auto;
+    /* Set the desired width for the container */
+    height: auto;
+    /* Set the desired height for the container */
+    overflow: hidden;
+    /* Hide any overflowing content */
+    position: relative;
+    /* Position relative for absolute positioning of the image */
+}
+
+.image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Preserve aspect ratio while covering the entire container */
+    object-position: center center;
+    /* Center the image within the container */
+}
+.PictureCarousal{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 1000px;
+    height: 1000px;
+    padding: 48px;
+}
+.PictureCarousalBox {
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    border: 1px solid #BBB;
+    background: #FFF;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    width: auto;
+    margin: 24px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}

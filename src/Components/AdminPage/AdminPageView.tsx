@@ -17,7 +17,7 @@ import PieChart from '../Piechart/Piechart'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArticleIcon from '@mui/icons-material/Article';
 import Axios from "axios";
-import { PictureInPictureAlt } from "@mui/icons-material";
+import TablePictures from "../TablePictures/TablePictures";
 interface PercentData {
     percent: string
     header: string
@@ -30,46 +30,59 @@ interface FormEntries {
     WhatDidHappen: string
     WhatExpectHappen: string
     NumOfPictures: string
-    PictureElement: JSX.Element | undefined
+    PictureElement: any
 }
 
 
 function AdminPageView() {
-    const [PictureElements, setPictureElements] = useState<JSX.Element>()
     const [Percents, setPercents] = useState<PercentData[]>([])
     const chartLabels = ['Error', 'Defect', 'Failure', 'UI Feature', 'Logic Feature'];
     const [ChartData, setChartData] = useState<number[]>([])
     const [ToggledMenu, setToggledMenu] = useState<boolean>(false);
-    const [ToggledPopup, setToggledPopup] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [Row, setRow] = useState<FormEntries[]>([]);
     const [Mode, setMode] = useState(false);
     const [initialLoad, setInitialLoad] = useState(true);
     const [CurrentColors, setCurrentColors] = useState({ Main: 'temp', Stroke: 'temp', Header: 'temp', Accent: 'temp', TextColor: 'temp', Contrast: 'temp' });
-
-    const AddToFormEntriesArray = (newValue: FormEntries) => {
-        setRow((prevArray) => [...prevArray, newValue]);
-    };
     const QueryForFormEntries = async () => {
         await Axios.post("http://localhost:5000/PullAllEntries", {
         }).then(async (response) => {
             if (response.data.returned === true) {
                 setRow([])
-                for (let i = 0; i < response.data.result.length; i++) {
-                    const entry = response.data.result[i];
-                    const Id = entry.EntryId
+                console.log('repsonses', response.data.result)
+                const entriesPromises = response.data.result.map(async (entry: any, iteration: number) => {
+                    const Id = entry.EntryId;
                     const Type = entry.TypeOfEntry;
                     const Page = entry.PageOfError;
                     const URL = entry.URLOfError;
                     const WhatDidHappen = entry.WhatDidHappen;
                     const WhatExpectHappen = entry.WhatIsExpected;
                     const NumOfPictures = entry.NumOfPictures;
-                    const newFormEntry: FormEntries = { EntryId: Id, Type: Type, Page: Page, URL: URL, WhatDidHappen: WhatDidHappen, WhatExpectHappen: WhatExpectHappen, NumOfPictures: NumOfPictures, PictureElement: (<div>{Id}</div>) }
-                    AddToFormEntriesArray(newFormEntry)
-                    if(NumOfPictures > 0){
-                        PullPictures(Id)
+
+                    let Element: any = <div></div>;
+
+                    if (NumOfPictures > 0) {
+                        const pictures = await PullPictures(Id);
+                        Element = pictures;
+                        console.log(Element)
                     }
-                }
+
+                    const newFormEntry: FormEntries = {
+                        EntryId: Id,
+                        Type: Type,
+                        Page: Page,
+                        URL: URL,
+                        WhatDidHappen: WhatDidHappen,
+                        WhatExpectHappen: WhatExpectHappen,
+                        NumOfPictures: NumOfPictures,
+                        PictureElement: Element,
+                    };
+
+                    return newFormEntry;
+                });
+
+                const newRows = await Promise.all(entriesPromises);
+                setRow(newRows);
             }
             else {
 
@@ -82,55 +95,59 @@ function AdminPageView() {
     //function to pull pictures by the EntryId, data is a file when pulled from database, inside of the file is the base64 Data URL that displays the image
     //is only called if NumOfPictures > 0
     const PullPictures = async (EntryId: number) => {
-        await Axios.post("http://localhost:5000/PullPicturesById", {
-            EntryId: EntryId
-        }).then(async (response) => {
-            console.log(response)
-            for (let i = 0; i < response.data.result.length; i++) {
-                // Assuming the received data is a Uint8Array
-                const binaryDataInitial: Uint8Array = response.data.result[i].PictureBlob.data;
+        try {
+            const response = await Axios.post("http://localhost:5000/PullPicturesById", {
+                EntryId: EntryId
+            });
 
-                // Convert the Uint8Array to a regular array (number[])
+            const picturesPromises = response.data.result.map(async (pictureData: any) => {
+                const binaryDataInitial: Uint8Array = pictureData.PictureBlob.data;
                 const binaryArray: number[] = Array.from(binaryDataInitial);
+                const uint8Array = new Uint8Array(binaryArray);
 
-                // Convert the binary data to a base64-encoded string
-                const base64String = btoa(String.fromCharCode(...binaryArray));
-                console.log('Raw Base64 string:', base64String);
-                const binaryString: string = atob(base64String);
+                const base64String = uint8Array.reduce((str, byte) => str + String.fromCharCode(byte), '');
+                const base64Encoded = btoa(base64String);
 
-                // Convert binary string to Uint8Array
+                const binaryString: string = atob(base64Encoded);
+
                 const binaryData: Uint8Array = new Uint8Array(binaryString.length);
                 for (let i = 0; i < binaryString.length; i++) {
                     binaryData[i] = binaryString.charCodeAt(i);
                 }
 
-                // Step 2: Create a Blob from the binary data
                 const blob: Blob = new Blob([binaryData], { type: 'application/octet-stream' });
-
-                // Step 3: Create a FileReader to read the content of the Blob
                 const fileReader: FileReader = new FileReader();
 
-                fileReader.onload = (event) => {
-                    // Step 4: Access the text content
-                    const textContent: string = event.target?.result as string;
-
-                    // Now you can use the 'textContent' variable, which contains the text from the file
-                    console.log(textContent);
-                    setPictureElements(<div>you have a picture with id of: {EntryId}</div>)
+                // Use a Promise to handle asynchronous reading of the Blob
+                const readBlob = () => {
+                    return new Promise<string>((resolve) => {
+                        fileReader.onload = (event) => {
+                            const textContent: string = event?.target?.result as string;
+                            resolve(textContent);
+                        };
+                        fileReader.readAsText(blob);
+                    });
                 };
 
-                // Step 5: Read the Blob as text
-                fileReader.readAsText(blob);
-            }
-        })
-    }
+                const textContent = await readBlob();
+                return <div className="image-container" key={pictureData.PictureId}><img className="image" src={textContent}></img></div>;
+            });
+
+            // Use Promise.all to wait for all picture promises to resolve
+            const pictures = await Promise.all(picturesPromises);
+            //need to loop over all the ModalStates so we can get the correct one associated with this particular modal
+            return (<TablePictures Pictures={pictures}></TablePictures>);
+        } catch (error) {
+            console.error(error);
+            return [<div key={0}>Error loading pictures for EntryId: {EntryId}</div>];
+        }
+    };
     //counts each iteration of each type of error, and calculates percentages
     const CalculateChartData = () => {
         var chartNumber = [0, 0, 0, 0, 0]
         var percentages = ['', '', '', '', '']
         var PercentObject: PercentData[] = []
         var total: number = 0
-        console.log(Row.length)
         for (let i = 0; i < Row.length; i++) {
             for (let j = 0; j < chartLabels.length; j++) {
                 if (Row[i].Type === chartLabels[j]) {
@@ -178,11 +195,16 @@ function AdminPageView() {
         CalculateChartData();
     }, [Row]);
     useEffect(() => {
+        console.log('Initial load effect fired');
         if (initialLoad) {
-            QueryForFormEntries()
-            setInitialLoad(false);
+            QueryForFormEntries();
+
+            // Set initialLoad to false only after the initial render
+            return () => {
+                setInitialLoad(false);
+            };
         }
-    }, [])
+    }, []);
 
 
 
