@@ -8,6 +8,7 @@ import "./UserView.css";
 
 import { useEffect, useState } from "react";
 
+//Main page where the user will input the Form
 function UserView() {
     const [Mode, setMode] = useState(false);
     const [ToggledMenu, setToggledMenu] = useState<boolean>(false);
@@ -30,6 +31,7 @@ function UserView() {
         TextColor: "#000000",
         Contrast: "#FFFFFF"
     }
+    //useEffect only triggered when darkmode and light mode are toggled
     useEffect(() => {
         if (Mode === false) {
             setCurrentColors(LightPallete);

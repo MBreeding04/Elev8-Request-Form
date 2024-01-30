@@ -5,7 +5,7 @@ interface PieChartProps {
     data: number[];
     labels: string[];
 }
-
+//pie chart to visualize data on admin page
 const PieChart: React.FC<PieChartProps> = ({ data, labels }) => {
     const chartRef = useRef<HTMLCanvasElement>(null);
 

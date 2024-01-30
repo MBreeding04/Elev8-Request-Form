@@ -9,6 +9,7 @@ import Axios from "axios";
 import { useState, useEffect } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import './Form.css'
+//Main form(questions) where the user inputs their data
 function Form() {
     //states to handle data
     const [TypeError, setTypeError] = useState<string | undefined>(undefined);

@@ -28,6 +28,7 @@ db.connect((err) => {
 app.get("/", (_req, res) => {
     res.json({ message: "Connected" });
 });
+//control to verify Admin UserName and Password
 app.post("/VerifyUserPass", async (req, res) => {
     try {
         const UserName = req.body.UserName;
@@ -53,6 +54,7 @@ app.post("/VerifyUserPass", async (req, res) => {
         res.send({ Authenticated: false, error: { error } })
     }
 })
+//inputs form into database
 app.post("/InputFormEntry", async (req, res) => {
     try {
         const TypeOfError = req.body.TypeOfError;
@@ -82,6 +84,7 @@ app.post("/InputFormEntry", async (req, res) => {
         res.send({ inserted: false, error })
     }
 })
+//inputs images to the database, cooresponding to a form entry (one to many)
 app.post("/InputImages", async (req, res) => {
     try {
         console.log('Request Body:', req.body);
@@ -105,6 +108,7 @@ app.post("/InputImages", async (req, res) => {
         res.send({ inserted: false, error })
     }
 });
+//Pulls all form entries and pictures associated with each form entry
 app.post("/PullAllEntries", async (req, res) => {
     try {
         db.query(
@@ -124,6 +128,7 @@ app.post("/PullAllEntries", async (req, res) => {
         res.send({ returned: false, error })
     }
 });
+//Pulls pictures by there foreign key of form entries
 app.post("/PullPicturesById", async (req, res) => {
     try {
         const EntryId = req.body.EntryId

@@ -9,7 +9,7 @@ interface DropdownProps{
     setToggledPopup: React.Dispatch<React.SetStateAction<boolean>>
     ToggledPopup: boolean
 }
-
+//menu dropdown, triggers popup in main page(userview)
 function Dropdown({setToggledMenu, ToggledMenu, setToggledPopup, ToggledPopup}: DropdownProps) {
     const Navigate = useNavigate()
     return (

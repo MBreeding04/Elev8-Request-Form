@@ -167,6 +167,7 @@ function AdminPageView() {
         TextColor: "#000000",
         Contrast: "#FFFFFF"
     }
+    //on initial render, query for data and when rows are sent visualize the data with the chart
     useEffect(() => {
         if (Mode === false) {
             setCurrentColors(LightPallete);

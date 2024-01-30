@@ -12,7 +12,7 @@ interface PopupProps {
     setToggledPopup: React.Dispatch<React.SetStateAction<boolean>>
     ToggledPopup: boolean
 }
-
+//popup to take admin credentials from the user and check if they get access to the admin page
 function AdminPopup({ setToggledPopup, ToggledPopup }: PopupProps) {
     const Navigate = useNavigate();
     const [UserName, setUserName] = useState<string>('');
@@ -20,12 +20,15 @@ function AdminPopup({ setToggledPopup, ToggledPopup }: PopupProps) {
     const [IsAlert, setIsAlert] = useState<boolean>(false);
     const [ErrorMessage, setErrorMessage] = useState<string>('');
 
+    //handles textbox changes
     const HandleUserName = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>{
         setUserName(e.target.value)
     }
     const HandlePassword = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>{
         setPassword(e.target.value)
     }
+
+    //function that is called on submitt and verifies the UserName and Password
     const HandleSubmit = async () => {
         
         await Axios.post("http://localhost:5000/VerifyUserPass", {

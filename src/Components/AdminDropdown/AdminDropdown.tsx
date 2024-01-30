@@ -8,6 +8,7 @@ interface DropdownProps{
     setToggledMenu: React.Dispatch<React.SetStateAction<boolean>>
     ToggledMenu: boolean
 }
+//dropdown for admin view returns popup to main page
 function AdminDropdown({setToggledMenu}: DropdownProps) {
     const Navigate = useNavigate();
     return (
