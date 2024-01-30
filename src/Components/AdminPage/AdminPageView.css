@@ -155,3 +155,16 @@
     width: 100vw;
     height: 100%;
 }
+.AdminConfirmPopup {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.AdminConfirmContainer{
+    border-radius: 5px;
+    border: 0.5px solid #787878;
+    background: #F9F9F9;
+    display: flex;
+    flex-direction: column;
+}

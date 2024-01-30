@@ -37,7 +37,7 @@ const PieChart: React.FC<PieChartProps> = ({ data, labels }) => {
     }, [data, labels]);
 
     return (
-        <canvas ref={chartRef} width="1100" height="900"></canvas>
+        <canvas ref={chartRef} width="990" height="900"></canvas>
     );
 };
 
