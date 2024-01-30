@@ -3,7 +3,6 @@ import mysql from "mysql"
 import cors from "cors"
 import * as dotenv from 'dotenv'
 dotenv.config()
-console.log(dotenv.config())
 const app = express();
 
 app.use(cors())

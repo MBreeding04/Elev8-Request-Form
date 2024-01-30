@@ -105,11 +105,14 @@ function Form() {
                 if (Images === undefined) {
                     console.log('no images need to be processed')
                     setToggledPopup(true)
-                    setPopupMessage('Inputed data successfully!')
+                    setPopupMessage('Inputted data successfully!')
                     setPopupColor('success')
+                    SendToGithub(false)
                 }
                 else {
+                    //triggers the processing for images
                     setCurrentUserId(newUserId);
+                    SendToGithub(true)
                 }
             }
             else {
@@ -148,7 +151,6 @@ function Form() {
                                 UUID: CurrentUserId
                             },
                             {
-                                responseType: 'blob', 
                                 headers: {
                                     'Content-Type': 'application/json'
                                 }
@@ -157,7 +159,7 @@ function Form() {
                         if (response.data.inserted === true) {
                             console.log('Passed');
                             setToggledPopup(true)
-                            setPopupMessage('Inputed data successfully!')
+                            setPopupMessage('Inputted data successfully!')
                             setPopupColor('success')
                         } else {
                             console.log('Not Passed');
@@ -209,6 +211,73 @@ function Form() {
             handleImageEntries();
         }
     }, [CurrentUserId]);
+    const SendToGithub = async (isPicture: boolean) => {
+        const username = 'MBreeding04';
+        const repo = 'Pawns-And-Puzzles-Website';
+        const token = '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';
+        const apiUrl = `https://api.github.com/repos/${username}/${repo}/issues`;
+    
+        // Add your actual label here
+    
+        const PreBody = `Type:  ${TypeError}
+            Page:  ${PageEntry}
+            URL:   ${URLEntry}
+            What do you expect to happen:
+            \n${WhatHappenedEntry}
+            What did happen:
+            \n${WhatDidHappenedEntry}
+            \n`;
+    
+        let ImageBody = '';
+    
+        if (isPicture) {
+            try {
+                // Encode images to base64 and include in the issue body
+                if (Images) {
+                    for (let i = 0; i < Images.length; i++) {
+                        //const file = Images[i];
+                        //const base64Data: any = await readAsDataURL(file);
+                        // Format the base64 data as a direct link to the image
+                        //ImageBody += `![File${i + 1}](data:image/png;base64,${base64Data.split(',')[1]})\n`;
+                        ImageBody += `file#${i+1} placeholder\n\n`
+                    }
+                }
+            } catch (error: any) {
+                console.error('Error encoding files:', error.message);
+                return;
+            }
+        }
+    
+        // Create the issue with the image references
+        const issueData = {
+            title: 'Bug/Feature Request',
+            body: `${PreBody}\n${ImageBody}`,
+            labels: [TypeError], // Replace with the actual label name
+        };
+    
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        };
+    
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(issueData),
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Failed to create issue: ${response.statusText}`);
+            }
+    
+            const data = await response.json();
+            console.log('Issue created successfully:', data);
+        } catch (error: any) {
+            console.error('Error creating issue:', error.message);
+        }
+    };
+    
     return (
         <Box className='Form'>
             <Box className='SubHeaders'>
@@ -216,52 +285,52 @@ function Form() {
             </Box>
             <Divider variant="middle" color='#FF6600'></Divider>
             <form onSubmit={HandleFormEntrySubmit}>
-            <Box className='questionContainer'>
-                <Box className='Headers'>1.</Box>
-                <Box className='questionInput'>
-                    <Box className='Questions'>
-                        What are you reporting?
+                <Box className='questionContainer'>
+                    <Box className='Headers'>1.</Box>
+                    <Box className='questionInput'>
+                        <Box className='Questions'>
+                            What are you reporting?
+                        </Box>
+                        <FormControl>
+                            <RadioGroup
+                                aria-labelledby="demo-radio-buttons-group-label"
+                                name="radio-buttons-group"
+                                aria-required="true"
+                                onChange={(e) => {
+                                    setTypeError(e.target.value)
+                                }}
+                                value={TypeError}
+                            >
+                                <FormControlLabel className="Questions" value="Error" checked={isUndefined()} control={<Radio sx={{
+                                    '&, &.Mui-checked': {
+                                        color: '#F60',
+                                    },
+                                }} />} label="Error" />
+                                <FormControlLabel className="Questions" value="Defect" checked={isUndefined()} control={<Radio sx={{
+                                    '&, &.Mui-checked': {
+                                        color: '#F60',
+                                    },
+                                }} />} label="Defect" />
+                                <FormControlLabel className="Questions" value="Failure" checked={isUndefined()} control={<Radio sx={{
+                                    '&, &.Mui-checked': {
+                                        color: '#F60',
+                                    },
+                                }} />} label="Failure" />
+                                <FormControlLabel className="Questions" value="UI Feature" checked={isUndefined()} control={<Radio sx={{
+                                    '&, &.Mui-checked': {
+                                        color: '#F60',
+                                    },
+                                }} />} label="UI Feature" />
+                                <FormControlLabel className="Questions" value="Logic Feature" checked={isUndefined()} control={<Radio sx={{
+                                    '&, &.Mui-checked': {
+                                        color: '#F60',
+                                    },
+                                }} />} label="Logic Feature" />
+                            </RadioGroup>
+                        </FormControl>
                     </Box>
-                    <FormControl>
-                        <RadioGroup
-                            aria-labelledby="demo-radio-buttons-group-label"
-                            name="radio-buttons-group"
-                            aria-required="true"
-                            onChange={(e) => {
-                                setTypeError(e.target.value)
-                            }}
-                            value={TypeError}
-                        >
-                            <FormControlLabel className="Questions" value="Error" checked={isUndefined()} control={<Radio sx={{
-                                '&, &.Mui-checked': {
-                                    color: '#F60',
-                                },
-                            }} />} label="Error" />
-                            <FormControlLabel className="Questions" value="Defect" checked={isUndefined()} control={<Radio sx={{
-                                '&, &.Mui-checked': {
-                                    color: '#F60',
-                                },
-                            }} />} label="Defect" />
-                            <FormControlLabel className="Questions" value="Failure" checked={isUndefined()} control={<Radio sx={{
-                                '&, &.Mui-checked': {
-                                    color: '#F60',
-                                },
-                            }} />} label="Failure" />
-                            <FormControlLabel className="Questions" value="UI Feature" checked={isUndefined()} control={<Radio sx={{
-                                '&, &.Mui-checked': {
-                                    color: '#F60',
-                                },
-                            }} />} label="UI Feature" />
-                            <FormControlLabel className="Questions" value="Logic Feature" checked={isUndefined()} control={<Radio sx={{
-                                '&, &.Mui-checked': {
-                                    color: '#F60',
-                                },
-                            }} />} label="Logic Feature" />
-                        </RadioGroup>
-                    </FormControl>
                 </Box>
-            </Box>
-            
+
                 <Box className='questionContainer'>
                     <Box className='Headers'>2.</Box>
                     <Box className='questionInput'>
