@@ -6,7 +6,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import Axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, ChangeEvent } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import './Form.css'
 //Main form(questions) where the user inputs their data
@@ -28,6 +28,8 @@ function Form() {
             return false
         }
     }
+    
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const validSeverityValues = ["error", "warning", "info", "success"];
     const sanitizedPopupColor = validSeverityValues.includes(PopupColor) ? PopupColor : "info";
     //handles dropping of files into file drop zone
@@ -78,6 +80,31 @@ function Form() {
         };
 
     }, []);
+    //handles when Submit document box is clicked.
+    const handleButtonClick = () => {
+        // Trigger the hidden input when the button is clicked
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        // Handle the selected files as needed
+        setImages(files!)
+    };
+
+
+    //For the UX shows the user how many files are inputted
+    const DisplayFiles = () => {
+        if (Images === undefined || Images === null) {
+            return <div className="FileDisplay">Number of files: 0</div>
+        }
+        else {
+            return <div className="FileDisplay">Number of files: {Images!.length}</div>
+        }
+
+    }
 
     //function to handle form submit, pushes to database and checks to see if images need to be inputted to database
     const HandleFormEntrySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -112,7 +139,7 @@ function Form() {
                 else {
                     //triggers the processing for images
                     setCurrentUserId(newUserId);
-                    SendToGithub(true)
+                    await SendToGithub(true)
                 }
             }
             else {
@@ -161,6 +188,7 @@ function Form() {
                             setToggledPopup(true)
                             setPopupMessage('Inputted data successfully!')
                             setPopupColor('success')
+                            setImages(undefined)
                         } else {
                             console.log('Not Passed');
                             setPopupMessage('Something happened when contacting the server!')
@@ -216,9 +244,9 @@ function Form() {
         const repo = 'Pawns-And-Puzzles-Website';
         const token = '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';
         const apiUrl = `https://api.github.com/repos/${username}/${repo}/issues`;
-    
+
         // Add your actual label here
-    
+
         const PreBody = `Type:  ${TypeError}
             Page:  ${PageEntry}
             URL:   ${URLEntry}
@@ -227,9 +255,9 @@ function Form() {
             What did happen:
             \n${WhatDidHappenedEntry}
             \n`;
-    
+
         let ImageBody = '';
-    
+
         if (isPicture) {
             try {
                 // Encode images to base64 and include in the issue body
@@ -239,7 +267,7 @@ function Form() {
                         //const base64Data: any = await readAsDataURL(file);
                         // Format the base64 data as a direct link to the image
                         //ImageBody += `![File${i + 1}](data:image/png;base64,${base64Data.split(',')[1]})\n`;
-                        ImageBody += `file#${i+1} placeholder\n\n`
+                        ImageBody += `file#${i + 1} placeholder\n\n`
                     }
                 }
             } catch (error: any) {
@@ -247,30 +275,30 @@ function Form() {
                 return;
             }
         }
-    
+
         // Create the issue with the image references
         const issueData = {
             title: 'Bug/Feature Request',
             body: `${PreBody}\n${ImageBody}`,
             labels: [TypeError], // Replace with the actual label name
         };
-    
+
         const headers = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
         };
-    
+
         try {
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(issueData),
             });
-    
+
             if (!response.ok) {
                 throw new Error(`Failed to create issue: ${response.statusText}`);
             }
-    
+
             const data = await response.json();
             console.log('Issue created successfully:', data);
         } catch (error: any) {
@@ -397,14 +425,22 @@ function Form() {
                         <Box className='Questions'>
                             Please submit pictures of the error/feature:
                         </Box>
-                        <Box className='SubmitDocuments' id='dropZone'>
+                        <Box className='SubmitDocuments' id='dropZone' onClick={handleButtonClick}>
 
                             <Box className='gray'>
                                 Drag and Drop files here or browse to upload.
                                 (5mb upload limit for each picture)
                                 <FileUploadIcon sx={{ alignSelf: 'center' }}></FileUploadIcon>
                             </Box>
+                            <input
+                                type="file"
+                                multiple
+                                ref={fileInputRef}
+                                style={{ display: 'none' }}
+                                onChange={handleFileChange}
+                            />
                         </Box>
+                        {DisplayFiles()}
                     </Box>
                 </Box>
                 <Button type="submit" sx={{

@@ -15,11 +15,11 @@ app.get("/", (_req, res) => {
 //control to verify Admin UserName and Password
 app.post("/VerifyUserPass", async (req, res) => {
     const db = mysql.createConnection({
-        host: 'sql9.freemysqlhosting.net',
-        user: 'sql9678711',
-        password: 'dUyhpX35jf',
-        database: 'sql9678711',
-        port: '3306'
+        host: process.env.REACT_APP_HOST,
+        user: process.env.REACT_APP_USER,
+        password: process.env.REACT_APP_PASSWORD,
+        database: process.env.REACT_APP_DATABASE,
+        port: process.env.REACT_APP_PORT
     })
     try {
         const UserName = req.body.UserName;
@@ -216,7 +216,7 @@ app.post("/DeleteAllEntries", async (req, res) => {
     })
     try {
         db.query(
-            "DELETE Pictures, FormEntry FROM FormEntry JOIN Pictures ON FormEntry.EntryId = Pictures.UUID",
+            "DELETE FormEntry, Pictures FROM FormEntry LEFT JOIN Pictures ON FormEntry.EntryId = Pictures.UUID",
             (err, result) => {
                 console.log(`error message: ${err}`)
                 if (err) {

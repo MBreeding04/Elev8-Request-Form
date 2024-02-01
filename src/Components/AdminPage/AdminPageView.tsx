@@ -106,6 +106,7 @@ function AdminPageView() {
         })
 
     }
+    //Deletes all form entries and every picture associated with the form entries
     const DeleteAllEntries = async () => {
         const response = await Axios.post("http://localhost:5000/DeleteAllEntries", {
         });
@@ -120,6 +121,7 @@ function AdminPageView() {
             setPopupColor('error')
         }
     }
+    //generates the CSV file from the database
     const GenerateCSVFile = () => {
         const GeneratedCSVFile = Papa.unparse(CSVData)
         const blob = new Blob([GeneratedCSVFile], { type: 'text/csv;charset=utf-8;' });
@@ -247,9 +249,6 @@ function AdminPageView() {
             QueryForFormEntries();
         }
     },[]);
-
-
-
     return (
         <Box className="AdminMainBody" sx={{ bgcolor: CurrentColors.Main }}>
             <Box className="Header" sx={{ bgcolor: CurrentColors.Header }}>
