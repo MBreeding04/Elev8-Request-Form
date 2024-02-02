@@ -18,7 +18,6 @@ function Dropdown({ setToggledMenu, ToggledMenu, setToggledPopup, ToggledPopup }
     const HandleIfCookie = () => {
         const bytes = CryptoJS.AES.decrypt(document.cookie, process.env.REACT_APP_SESSIONSECRET!)
         const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
-        console.log('after encryption',decryptedData)
         if(decryptedData == 'isAdmin=true'){
             Navigate('/AdminPage')
         }
@@ -32,7 +31,7 @@ function Dropdown({ setToggledMenu, ToggledMenu, setToggledPopup, ToggledPopup }
         <Box className="DropDownPopUp">
             <MenuItem onClick={() => { setToggledMenu(false) }}><Box className="text">Toggle Dark mode</Box></MenuItem>
             <Divider></Divider>
-            <MenuItem onClick={() => { HandleIfCookie() }}><Box className="text">Admin Login</Box></MenuItem>
+            <MenuItem onClick={() => { HandleIfCookie() }}><Box className="text">Admin Page</Box></MenuItem>
             <Divider></Divider>
             <MenuItem onClick={() => { setToggledMenu(false); Navigate('/FormsTable') }}><Box className="text">View Form Submissions(W.I.P)</Box></MenuItem>
         </Box>
