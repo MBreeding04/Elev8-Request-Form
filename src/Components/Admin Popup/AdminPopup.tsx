@@ -59,7 +59,7 @@ function AdminPopup({ setToggledPopup, ToggledPopup }: PopupProps) {
                 setErrorMessage('UserName and/or Password is incorrect')
                 setIsAlert(true)
             }
-        }).catch((error: any) => {
+        }).catch((error: string) => {
             setErrorMessage('There was a problem connecting to the server')
             console.log(error)
             setIsAlert(true)

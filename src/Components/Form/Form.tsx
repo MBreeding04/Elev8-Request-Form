@@ -270,7 +270,9 @@ function Form() {
                         ImageBody += `file#${i + 1} placeholder\n\n`
                     }
                 }
-            } catch (error: any) {
+            } 
+            //tsx forces catch parameters to be implicent any type
+            catch (error: any) {
                 console.error('Error encoding files:', error.message);
                 return;
             }
@@ -301,7 +303,9 @@ function Form() {
 
             const data = await response.json();
             console.log('Issue created successfully:', data);
-        } catch (error: any) {
+        } 
+        //tsx forces catch parameters to be implicent any type
+        catch (error: any) {
             console.error('Error creating issue:', error.message);
         }
     };

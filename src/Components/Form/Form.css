@@ -83,7 +83,15 @@
     font-weight: 700;
     line-height: normal;
 }
-
+.FileDisplay{
+    display: flex;
+    justify-content: center;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #F60;
+    font-size: 20px;
+    letter-spacing: 4.8px;
+}
 .StatusPopup {
     display: flex;
     flex-direction: column;
@@ -97,12 +105,18 @@
     display: flex;
     flex-direction: column;
 }
-.FileDisplay{
+.AuthStatusPopup {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    color: #F60;
-    font-size: 20px;
-    letter-spacing: 4.8px;
+    align-items: center;
+}
+.AuthStatusContainer{
+    border-radius: 5px;
+    border: 0.5px solid #787878;
+    background: #F9F9F9;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }

@@ -21,6 +21,11 @@ import TablePictures from "../TablePictures/TablePictures";
 import Alert, { AlertColor } from "@mui/material/Alert";
 import CloseIcon from '@mui/icons-material/Close';
 import Papa from 'papaparse';
+import {
+    Navigate,
+    useNavigate
+} from "react-router-dom";
+import * as CryptoJS from 'crypto-js';
 interface PercentData {
     percent: string
     header: string
@@ -41,6 +46,9 @@ function AdminPageView() {
     const [AdminConfirmToggledPopup, setAdminConfirmToggledPopup] = useState<boolean>(false)
     const [AdminConfirmPopupMessage, setAdminConfirmPopupMessage] = useState<string>('');
     const [AdminConfirmPopupColor, setAdminConfirmPopupColor] = useState<AlertColor>('info');
+    const [AuthToggledPopup, setAuthToggledPopup] = useState<boolean>(false)
+    const [AuthPopupMessage, setAuthPopupMessage] = useState<string>('');
+    const [AuthPopupColor, setAuthPopupColor] = useState<AlertColor>('info');
     const [ToggledPopup, setToggledPopup] = useState<boolean>(false)
     const [PopupMessage, setPopupMessage] = useState<string>('');
     const [PopupColor, setPopupColor] = useState<AlertColor>('info');
@@ -57,7 +65,25 @@ function AdminPageView() {
     const validSeverityValues = ["error", "warning", "info", "success"];
     const AdminSanitizedPopupColor = validSeverityValues.includes(AdminConfirmPopupColor) ? AdminConfirmPopupColor : "info";
     const sanitizedPopupColor = validSeverityValues.includes(PopupColor) ? PopupColor : "info";
+    const AuthsanitizedPopupColor = validSeverityValues.includes(AuthPopupColor) ? AuthPopupColor : "info";
+    const Navigate = useNavigate()
+    const HandleIfCookie = () => {
+        const bytes = CryptoJS.AES.decrypt(document.cookie, process.env.REACT_APP_SESSIONSECRET!)
+        const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
+        if(decryptedData == 'isAdmin=true'){
+            
+        }
+        else{
+            setAuthToggledPopup(true)
+            setAuthPopupMessage('Authentication failed please log in again on main form page!')
+            setAuthPopupColor('error')
+        }
+        
+    }
+
     const QueryForFormEntries = async () => {
+        //needs to be any type since the the response doesnt have implicent type
+        //it recieves an array of all data except for the pictures
         const AddNewCSVRow = (temp: any) => {
             setCSVData(prevData => [...prevData, temp]);
         };
@@ -66,6 +92,7 @@ function AdminPageView() {
             if (response.data.returned === true) {
                 setRow([])
                 setCSVData([['Type', 'Page', 'URL', 'What you expect to happen', 'What did happen', 'Number of pictures']])
+                //need implicent any type because repsonse is an object and doesnt have a type
                 const entriesPromises = response.data.result.map(async (entry: any, iteration: number) => {
                     const Id = entry.EntryId;
                     const Type = entry.TypeOfEntry;
@@ -77,7 +104,7 @@ function AdminPageView() {
                     
                     AddNewCSVRow([Type, Page, URL, WhatDidHappen, WhatExpectHappen, NumOfPictures])
 
-                    let Element: any = <div></div>;
+                    let Element: JSX.Element | JSX.Element[] = <div></div>;
 
                     if (NumOfPictures > 0) {
                         const pictures = await PullPictures(Id);
@@ -126,6 +153,7 @@ function AdminPageView() {
         const GeneratedCSVFile = Papa.unparse(CSVData)
         const blob = new Blob([GeneratedCSVFile], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
+        //needs to be casted as any so ASaveblob can be called
         if ((navigator as any).msSaveBlob) {
             // For IE
             (navigator as any).msSaveBlob(blob, 'data.csv');
@@ -146,7 +174,7 @@ function AdminPageView() {
             const response = await Axios.post("http://localhost:5000/PullPicturesById", {
                 EntryId: EntryId
             });
-
+            //is casted as any because it is being called from an api and cannot assign a type
             const picturesPromises = response.data.result.map(async (pictureData: any) => {
                 const binaryDataInitial: Uint8Array = pictureData.PictureBlob.data;
                 const binaryArray: number[] = Array.from(binaryDataInitial);
@@ -247,6 +275,7 @@ function AdminPageView() {
             setInitialLoad(false)
             console.log('Initial load effect fired');
             QueryForFormEntries();
+            HandleIfCookie()
         }
     },[]);
     return (
@@ -277,7 +306,8 @@ function AdminPageView() {
                         <CheckBoxIcon sx={{ color: '#F60', fontSize: '50px' }}></CheckBoxIcon><Box className="PercentHeaders">Active</Box>
                     </Box>
                     <Box className='BottomRightSide'>
-                        <TableContainer sx={{ width:'100%' }} component={Paper}>
+                        {/*styling needs to be done inline since the component is being called inline */}
+                        <TableContainer sx={{ width:'100%'}} component={Paper}>
                             <Table>
                                 <TableHead>
                                     <TableRow>
@@ -333,6 +363,7 @@ function AdminPageView() {
                     </Box>
                 </Box>
             </Box>
+            {/*confirmation box for deleting entries */}
             <Modal className="AdminConfirmPopup" open={AdminConfirmToggledPopup} onClose={() => { setAdminConfirmToggledPopup(false) }}>
                 <Box className='AdminConfirmContainer'>
                     <Box className='StatusHeader'>
@@ -353,6 +384,7 @@ function AdminPageView() {
                     }} variant="contained"><Box className='Submit'>Yes</Box></Button>
                 </Box>
             </Modal>
+            {/*status popup to show confirmation or denial */}
             <Modal className="StatusPopup" open={ToggledPopup} onClose={() => { setToggledPopup(false) }}>
                 <Box className='StatusContainer'>
                     <Box className='StatusHeader'>
@@ -365,6 +397,26 @@ function AdminPageView() {
                     <Button onClick={() => {
                         setToggledPopup(false)
                         window.location.reload()
+                    }} sx={{
+                        m: '12px',
+                        bgcolor: '#F60', ':hover': {
+                            bgcolor: '#CD5200',
+                        }
+                    }} variant="contained"><Box className='Submit'>Ok</Box></Button>
+                </Box>
+            </Modal>
+            {/*popup for if auth is not working for admin page or if user automatically inputs the route without authenticating first */}
+            <Modal className="AuthStatusPopup" open={AuthToggledPopup} onClose={() => { setAuthToggledPopup(false) }}>
+                <Box className='AuthStatusContainer'>
+                    <Box className='AuthStatusHeader'>
+                        <IconButton onClick={() => { Navigate('/') }}><CloseIcon></CloseIcon></IconButton>
+                    </Box>
+                    <Divider></Divider>
+                    <Alert severity={AuthsanitizedPopupColor}>
+                        {AuthPopupMessage}
+                    </Alert>
+                    <Button onClick={() => {
+                        Navigate('/')
                     }} sx={{
                         m: '12px',
                         bgcolor: '#F60', ':hover': {

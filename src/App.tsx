@@ -8,7 +8,7 @@ import AdminPageView from "./Components/AdminPage/AdminPageView";
 import UserView from "./Components/UserView/UserView";
 function App() {
   return (
-    //main page holds all the other pages data but only switches wehn the corresponding route is called.
+    //main page holds all the other pages data but only switches when the corresponding route is called.
     <HashRouter>
       <Routes>
         <Route path='/' element={<UserView></UserView>} />
