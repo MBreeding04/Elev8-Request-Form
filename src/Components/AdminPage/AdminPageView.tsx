@@ -251,7 +251,7 @@ function AdminPageView() {
     },[]);
     return (
         <Box className="AdminMainBody" sx={{ bgcolor: CurrentColors.Main }}>
-            <Box className="Header" sx={{ bgcolor: CurrentColors.Header }}>
+            <Box className="AdminHeader" sx={{ bgcolor: CurrentColors.Header }}>
                 <Box className='imageContainer'>
                     <img src={Logo} alt="Elev8"></img>
                 </Box>
@@ -277,7 +277,7 @@ function AdminPageView() {
                         <CheckBoxIcon sx={{ color: '#F60', fontSize: '50px' }}></CheckBoxIcon><Box className="PercentHeaders">Active</Box>
                     </Box>
                     <Box className='BottomRightSide'>
-                        <TableContainer sx={{ width: '1250px' }} component={Paper}>
+                        <TableContainer sx={{ width:'100%' }} component={Paper}>
                             <Table>
                                 <TableHead>
                                     <TableRow>

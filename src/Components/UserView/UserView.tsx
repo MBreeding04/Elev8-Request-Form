@@ -45,26 +45,32 @@ function UserView() {
         } else {
             setCurrentColors(DarkPallete);
         }
-    },[])
+    }, [])
     return (
         <Box className="MainBody" sx={{ bgcolor: CurrentColors.Main }}>
             <Box className="Header" sx={{ bgcolor: CurrentColors.Header }}>
-                <Box className='imageContainer'>
-                    <img src={Logo} alt="Elev8"></img>
+            <Box className="imageContainer">
+                    <img src={Logo} alt="Elev8" />
                 </Box>
-                <IconButton onClick={(e) => {
-                    setAnchorEl(e.currentTarget)
-                    setToggledMenu(true)
-                }} className="HamburgerMenu" sx={{ color: CurrentColors.Contrast }}><MenuIcon sx={{ fontSize: '40px' }}></MenuIcon></IconButton>
-                <Menu open={ToggledMenu} anchorEl={anchorEl} onClose={() => { setToggledMenu(false) }}>
-                    <Dropdown setToggledMenu={setToggledMenu} ToggledMenu={ToggledMenu} setToggledPopup={setToggledPopup} ToggledPopup={ToggledPopup}></Dropdown>
+                <IconButton
+                    onClick={(e) => {
+                        setAnchorEl(e.currentTarget);
+                        setToggledMenu(true);
+                    }}
+                    className="HamburgerMenu"
+                    sx={{ color: CurrentColors.Contrast }}
+                >
+                    <MenuIcon sx={{ fontSize: '40px' }} />
+                </IconButton>
+                <Menu open={ToggledMenu} anchorEl={anchorEl} onClose={() => setToggledMenu(false)}>
+                    <Dropdown setToggledMenu={setToggledMenu} ToggledMenu={ToggledMenu} setToggledPopup={setToggledPopup} ToggledPopup={ToggledPopup} />
                 </Menu>
             </Box>
             <Box className="FormContainer">
-                <Form></Form>
+                <Form/>
             </Box>
-            <Modal className="Modal" open={ToggledPopup} onClose={() => { setToggledPopup(false) }}>
-                <AdminPopup setToggledPopup={setToggledPopup} ToggledPopup={ToggledPopup}></AdminPopup>
+            <Modal className="Modal" open={ToggledPopup} onClose={() => setToggledPopup(false)}>
+                <AdminPopup setToggledPopup={setToggledPopup} ToggledPopup={ToggledPopup} />
             </Modal>
         </Box>
     );
