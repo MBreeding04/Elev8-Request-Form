@@ -55,11 +55,11 @@ app.post("/VerifyUserPass", async (req, res) => {
 //inputs form into database
 app.post("/InputFormEntry", async (req, res) => {
     const db = mysql.createConnection({
-        host: 'sql9.freemysqlhosting.net',
-        user: 'sql9678711',
-        password: 'dUyhpX35jf',
-        database: 'sql9678711',
-        port: '3306'
+        host: process.env.REACT_APP_HOST,
+        user: process.env.REACT_APP_USER,
+        password: process.env.REACT_APP_PASSWORD,
+        database: process.env.REACT_APP_DATABASE,
+        port: process.env.REACT_APP_PORT
     })
     try {
         const TypeOfError = req.body.TypeOfError;
@@ -99,11 +99,11 @@ app.post("/InputFormEntry", async (req, res) => {
 //inputs images to the database, cooresponding to a form entry (one to many)
 app.post("/InputImages", async (req, res) => {
     const db = mysql.createConnection({
-        host: 'sql9.freemysqlhosting.net',
-        user: 'sql9678711',
-        password: 'dUyhpX35jf',
-        database: 'sql9678711',
-        port: '3306'
+        host: process.env.REACT_APP_HOST,
+        user: process.env.REACT_APP_USER,
+        password: process.env.REACT_APP_PASSWORD,
+        database: process.env.REACT_APP_DATABASE,
+        port: process.env.REACT_APP_PORT
     })
     try {
         console.log('Request Body:', req.body);
@@ -137,11 +137,11 @@ app.post("/InputImages", async (req, res) => {
 //Pulls all form entries and pictures associated with each form entry
 app.post("/PullAllEntries", async (req, res) => {
     const db = mysql.createConnection({
-        host: 'sql9.freemysqlhosting.net',
-        user: 'sql9678711',
-        password: 'dUyhpX35jf',
-        database: 'sql9678711',
-        port: '3306'
+        host: process.env.REACT_APP_HOST,
+        user: process.env.REACT_APP_USER,
+        password: process.env.REACT_APP_PASSWORD,
+        database: process.env.REACT_APP_DATABASE,
+        port: process.env.REACT_APP_PORT
     })
     try {
         db.query(
@@ -171,11 +171,11 @@ app.post("/PullAllEntries", async (req, res) => {
 //Pulls pictures by there foreign key of form entries
 app.post("/PullPicturesById", async (req, res) => {
     const db = mysql.createConnection({
-        host: 'sql9.freemysqlhosting.net',
-        user: 'sql9678711',
-        password: 'dUyhpX35jf',
-        database: 'sql9678711',
-        port: '3306'
+        host: process.env.REACT_APP_HOST,
+        user: process.env.REACT_APP_USER,
+        password: process.env.REACT_APP_PASSWORD,
+        database: process.env.REACT_APP_DATABASE,
+        port: process.env.REACT_APP_PORT
     })
     try {
         const EntryId = req.body.EntryId
@@ -208,11 +208,11 @@ app.post("/PullPicturesById", async (req, res) => {
 //deletes all entries and pictures associated with each form entries
 app.post("/DeleteAllEntries", async (req, res) => {
     const db = mysql.createConnection({
-        host: 'sql9.freemysqlhosting.net',
-        user: 'sql9678711',
-        password: 'dUyhpX35jf',
-        database: 'sql9678711',
-        port: '3306'
+        host: process.env.REACT_APP_HOST,
+        user: process.env.REACT_APP_USER,
+        password: process.env.REACT_APP_PASSWORD,
+        database: process.env.REACT_APP_DATABASE,
+        port: process.env.REACT_APP_PORT
     })
     try {
         db.query(
