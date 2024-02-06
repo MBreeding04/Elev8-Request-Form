@@ -26,6 +26,7 @@ import {
     useNavigate
 } from "react-router-dom";
 import * as CryptoJS from 'crypto-js';
+import TextBoxPopUp from '../TextBoxPopup/TextBoxPopup'
 interface PercentData {
     percent: string
     header: string
@@ -331,7 +332,7 @@ function AdminPageView() {
                                             </TableCell>
                                             <TableCell align="center"><Box className="AdminTableData" >{row.Page}</Box></TableCell>
                                             <TableCell align="center"><Box className="AdminTableData" >{row.URL}</Box></TableCell>
-                                            <TableCell align="center"><Box className="AdminTableData" >{row.WhatExpectHappen}</Box></TableCell>
+                                            <TableCell align="center"><Box className="AdminTableData" ><TextBoxPopUp TextBlock={row.WhatExpectHappen} TextHeader={"What you expected to happen:"}></TextBoxPopUp></Box></TableCell>
                                             <TableCell align="center"><Box className="AdminTableData" >{row.WhatDidHappen}</Box></TableCell>
                                             <TableCell align="center"><Box className="AdminTableData" >{row.NumOfPictures}</Box></TableCell>
                                             <TableCell align="center"><Box className="AdminTableData" >{row.PictureElement}</Box></TableCell>
